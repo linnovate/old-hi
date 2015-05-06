@@ -3,7 +3,7 @@
 ![Screenshot](http://i.imgur.com/C4uMD67.png)
 
 A self-hosted chat app for small teams built by [Security Compass][seccom].
-
+Forked this to be used in the HI project
 ## Features and Stuff
 
 * BYOS (bring your own server)
