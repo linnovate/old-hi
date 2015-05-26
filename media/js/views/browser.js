@@ -55,7 +55,14 @@
                 context = _.extend(room, {
                     lastActive: moment(room.lastActive).calendar()
                 });
-            this.$('.lcb-rooms-list').append(this.template(context));
+            if (context.slug == "ext")
+            {
+                this.$('.lcb-rooms-list').append(this.template(context));
+            }
+            else
+            {
+                this.$('.lcb-rooms-list-external').before(this.template(context));
+            }
         },
         remove: function(room) {
             this.$('.lcb-rooms-list-item[data-id=' + room.id + ']').remove();
@@ -88,7 +95,17 @@
                 if (bj) return 1;
                 return 0;
             });
-            $items.detach().appendTo(this.$('.lcb-rooms-list'));
+            $items.detach();
+            $items.each(function () {
+                if (that.rooms.get($(this).data('id')).attributes.slug == "ext" || that.rooms.get($(this).data('id')).attributes.name == "ext")
+                {
+                    that.$('.lcb-rooms-list').append(this);
+                }
+                else
+                {
+                    that.$('.lcb-rooms-list-external').before(this);
+                }
+            });
         },
         filter: function(e) {
             e.preventDefault();

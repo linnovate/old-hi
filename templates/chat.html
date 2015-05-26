@@ -82,6 +82,12 @@
                         <i class="fa fa-th"></i>
                     </a>
                 </li>
+                <li style="color:white;padding-left:70px;">
+                    internal
+                </li>
+                <li class="lcb-tab-external" style="color:white;padding-left:70px;">
+                    external
+                </li>
             </ul>
         </section>
         <section class="lcb-panes">
@@ -100,7 +106,16 @@
                         <i class="fa fa-plus"></i>
                     </a>
                 </header>
-                <ul class="lcb-rooms-list"></ul>
+                <ul class="lcb-rooms-list">
+                    <li>
+                        <h1>internal</h1>
+                        <hr />
+                    </li>
+                    <li class="lcb-rooms-list-external">
+                        <h1>external</h1>
+                        <hr />
+                    </li>
+                </ul>
                 <% include 'includes/modals/add-room.html' %>
             </div>
         </section>
