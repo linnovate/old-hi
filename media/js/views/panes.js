@@ -41,7 +41,7 @@
             this.render();
         },
         add: function(room) {
-            if (room.slug == "secondroom")
+            if (room.name.search("ext") == -1)
             {
                 this.$el.find('.lcb-tab-external').before(this.template(room));
             }
