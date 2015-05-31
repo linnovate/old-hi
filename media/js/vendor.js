@@ -5,6 +5,7 @@
 //= require vendor/lodash/lodash.js
 //= require vendor/backbone/backbone.js
 //= require vendor/moment/moment.js
+//= require vendor/moment/locale/he.js
 //= require vendor/handlebars/handlebars.js
 //= require vendor/bootstrap/bootstrap.js
 //= require vendor/store.js/store.js

@@ -1,5 +1,11 @@
 <script type="text/x-handlebars-template" id="template-message">
     <li class="lcb-message {{#if mentioned}}lcb-message-mentioned{{/if}} {{#if fragment}}lcb-message-fragment{{/if}} {{#if own}}lcb-message-own{{/if}} {{#if fragment}}lcb-message-paste{{/if}}" data-owner="{{owner.id}}">
+        {{#if isFirst}}
+            <div class="lcb-date-line-divider">
+                <hr class="lcb-date-separator" />
+                <div class="lcb-date-text"></div>
+            </div>
+        {{/if}}
         {{#unless fragment}}
             <img class="lcb-message-avatar lcb-avatar lcb-room-poke" src="https://www.gravatar.com/avatar/{{owner.avatar}}?s=30" />
         {{/unless}}
