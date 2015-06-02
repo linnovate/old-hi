@@ -41,7 +41,14 @@
             this.render();
         },
         add: function(room) {
-            this.$el.append(this.template(room));
+            if (room.name.search("ext") == -1)
+            {
+                this.$el.find('.lcb-tab-external').before(this.template(room));
+            }
+            else
+            {
+                this.$el.append(this.template(room));   
+            }
         },
         remove: function(id) {
             this.$el.find('.lcb-tab[data-id=' + id + ']').remove();
