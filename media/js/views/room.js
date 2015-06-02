@@ -309,10 +309,9 @@
 
                 if (message.isFirst)
                 {
-                    var arrBeautDate = posted.format("LL").split(" ");
-                    var strBeautDate = "\u202A" + arrBeautDate[2] + "\u202C" + "\u202A" + " ," + 
-                                        "\u202C" + "\u202B" + arrBeautDate[1] + "\u202C" + "\u202A" +
-                                         " "  + "\u202C" + "\u202A" + arrBeautDate[0] + "\u202C";
+                    var strBeautDate = posted.format("LL");
+                    var secondSpace = strBeautDate.lastIndexOf(" ");
+                    strBeautDate = strBeautDate.slice(0, secondSpace) + ", " + strBeautDate.slice(secondSpace, strBeautDate.length);
                     $html.find('.lcb-date-text').text(strBeautDate);
                 }
             });
