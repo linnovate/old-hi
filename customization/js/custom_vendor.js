@@ -1,0 +1,1 @@
+//= require vendor/moment/locale/he.js
