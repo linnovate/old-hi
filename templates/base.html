@@ -8,8 +8,11 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
         <% block css %><% endblock %>
         <$ 'vendor' | css | safe $>
+        <$ 'custom_vendor' | css | safe $>
         <$ 'style' | css | safe $>
+        <$ 'custom_style' | css | safe $>
         <$ 'vendor' | js | safe $>
+        <$ 'custom_vendor' | js | safe $>
         <% block js %><% endblock %>
     </head>
     <body class="<% block class %><% endblock %>" <% block attributes %><% endblock %>>
