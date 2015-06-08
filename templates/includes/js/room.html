@@ -7,15 +7,15 @@
                         <span class="name">{{name}}</span>
                         <span class="slug">#{{slug}}</span>
                         <a class="btn hidden-xs show-edit-room"
-                            title="Edit Room">
+                            title="<$ __('Edit Room') $>">
                             <i class="fa fa-edit"></i>
                         </a>
-                        <a class="btn hidden-xs" title="Chat History"
+                        <a class="btn hidden-xs" title="<$ __('Chat History') $>"
                             href="./transcript?room={{ id }}" target="_blank">
                             <i class="fa fa-history"></i>
                         </a>
                         <% if settings.files.enable %>
-                        <a class="btn hidden-xs lcb-upload-trigger" title="Upload Files" href="#">
+                        <a class="btn hidden-xs lcb-upload-trigger" title="<$ __('Upload Files') $>" href="#">
                             <i class="fa fa-upload"></i>
                         </a>
                         <% endif %>
@@ -33,15 +33,15 @@
             <ul class="lcb-messages">
             </ul>
             <form class="lcb-entry">
-                <textarea class="lcb-entry-input" placeholder="Got something to say?" autofocus></textarea>
-                <button type="submit" class="btn btn-info lcb-entry-button">Send</button>
+                <textarea class="lcb-entry-input" placeholder="<$ __('Got something to say?') $>" autofocus></textarea>
+                <button type="submit" class="btn btn-info lcb-entry-button"><$ __('Send') $></button>
             </form>
         </div><!-- lcb-chat end -->
         <div class="lcb-room-sidebar">
             <div class="lcb-room-sidebar-group lcb-room-sidebar-users">
                 <header class="lcb-room-sidebar-header">
                     <h3 class="lcb-room-sidebar-heading">
-                        <i class="fa fa-users"></i> Who's Here (<span class="lcb-room-sidebar-items-count"></span>)
+                        <i class="fa fa-users"></i> <$ __('Who\'s Here') $>(<span class="lcb-room-sidebar-items-count"></span>)
                     </h3>
                 </header>
                 <ul class="lcb-room-sidebar-list"></ul>
@@ -50,7 +50,7 @@
             <div class="lcb-room-sidebar-group lcb-room-sidebar-files">
                 <header class="lcb-room-sidebar-header">
                     <h3 class="lcb-room-sidebar-heading">
-                        <i class="fa fa-file-text"></i> Files
+                        <i class="fa fa-file-text"></i> <$ __('Files') $>
                     </h3>
                     <button class="btn lcb-room-sidebar-files-add lcb-upload-trigger">
                         <i class="fa fa-plus"></i>
@@ -66,11 +66,11 @@
                 <form action="" class="validate form-horizontal" method="post">
                     <div class="modal-header">
                         <button class="close hide-edit-room" type="button">&times;</button>
-                        <h4 class="modal-title">Edit Room</h4>
+                        <h4 class="modal-title"><$ __('Edit Room') $></h4>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <label class="control-label col-sm-4">Name</label>
+                            <label class="control-label col-sm-4"><$ __('Name') $></label>
                             <div class="col-sm-7">
                                 <input class="required name form-control" name=
                                 "name" type="text" value="{{name}}">
@@ -78,7 +78,7 @@
                         </div>
                         <div class="form-group">
                             <label class=
-                            "control-label col-sm-4">Description</label>
+                            "control-label col-sm-4"><$ __('Description') $></label>
                             <div class="col-sm-7">
                                 <textarea class="form-control" name=
                                 "description">{{description}}</textarea>
@@ -88,10 +88,10 @@
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-success pull-right submit-edit-room" type=
-                        "submit"><i class="icon-ok"></i> Save</button>
+                        "submit"><i class="icon-ok"></i> <$ __('Save') $></button>
                         <a class="archive-room btn btn-danger pull-left"
                         tabindex="-1"><i class="icon-remove icon-white"></i>
-                        Archive Room</a>
+                        <$ __('Archive Room') $></a>
                     </div>
                 </form>
             </div>

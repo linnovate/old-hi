@@ -67,6 +67,9 @@ var session = {
     saveUninitialized: true
 };
 
+// Require additional settings (Customization)
+require('./customization/translate.js')(app, settings);
+
 // Set compression before any routes
 app.use(compression({ threshold: 512 }));
 
