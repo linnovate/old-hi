@@ -104,7 +104,8 @@ var bundles = {};
 app.use(require('connect-assets')({
     paths: [
         'media/js',
-        'media/less'
+        'media/less',
+        'customization/less',
     ],
     helperContext: bundles,
     build: settings.env === 'production',
@@ -114,6 +115,10 @@ app.use(require('connect-assets')({
 
 // Public
 app.use('/media', express.static(__dirname + '/media', {
+    maxAge: '364d'
+}));
+
+app.use('/customization', express.static(__dirname + '/customization', {
     maxAge: '364d'
 }));
 
