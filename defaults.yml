@@ -58,7 +58,7 @@ auth:
     passwordRegex: ^.{8,64}$
 
 private:
-  enable: false
+  enable: true
   roster: online # online / all
   expire: 360 # false or number of minutes
 
@@ -69,4 +69,4 @@ rooms:
   passwordProtected: true
 
 i18n:
-  locale: en
+  locale: he
