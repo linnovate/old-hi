@@ -52,13 +52,13 @@
                     <% if settings.xmpp.enable %>
                         <li>
                             <a data-toggle="modal" href="#lcb-xmpp">
-                                <i class="fa fa-fw fa-comments"></i> <$ __('XMPP/Jabber') $> 
+                                <i class="fa fa-fw fa-comments"></i> <$ __('XMPP/Jabber') $>
                             </a>
                         </li>
                     <% endif %>
                     <li>
                         <a data-toggle="modal" href="#lcb-tokens">
-                            <i class="fa fa-fw fa-lock"></i> <$ __('Auth Tokens') $> 
+                            <i class="fa fa-fw fa-lock"></i> <$ __('Auth Tokens') $>
                         </a>
                     </li>
                     <li class="divider"></li>
@@ -83,6 +83,12 @@
                             <i class="fa fa-th"></i>
                         </a>
                     </li>
+                    <li class="lcb-tab-internal">
+                        internal
+                    </li>
+                    <li class="lcb-tab-external">
+                        external
+                    </li>
                 </ul>
             </div>
         </section>
@@ -102,7 +108,16 @@
                         <i class="fa fa-plus"></i>
                     </a>
                 </header>
-                <ul class="lcb-rooms-list"></ul>
+                <ul class="lcb-rooms-list">
+                    <li>
+                        <h1>internal</h1>
+                        <hr />
+                    </li>
+                    <li class="lcb-rooms-list-external">
+                        <h1>external</h1>
+                        <hr />
+                    </li>
+                </ul>
                 <% include 'includes/modals/add-room.html' %>
                 <% include 'includes/modals/password.html' %>
             </div>

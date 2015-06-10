@@ -373,6 +373,13 @@
             // WHATS MY NAME
             message.mentioned = new RegExp('\\B@(' + this.client.user.get('username') + '|all)(?!@)\\b', 'i').test(message.text);
 
+            // Check if this is the first message to this date
+            if ((this.lastMessagePosted == undefined) || 
+                (this.lastMessagePosted.format("YYYY-MM-DD") !== posted.format("YYYY-MM-DD") && !message.fragment))
+            {
+                message.isFirst = true;
+            }
+
             // Templatin' time
             var $html = $(this.messageTemplate(message).trim());
             var $text = $html.find('.lcb-message-text');
@@ -380,7 +387,7 @@
             var that = this;
             this.formatMessage($text.html(), function(text) {
                 $text.html(text);
-                $html.find('time').updateTimeStamp();
+                $html.find('time').text(posted.format("HH:mm"));
                 that.$messages.append($html);
                 that.lastMessageOwner = message.owner.id;
                 that.lastMessagePosted = posted;
@@ -388,6 +395,14 @@
 
                 if (!message.historical) {
                     window.utils.eggs.message(message.text);
+                }
+
+                if (message.isFirst)
+                {
+                    var strBeautDate = posted.format("LL");
+                    var secondSpace = strBeautDate.lastIndexOf(" ");
+                    strBeautDate = strBeautDate.slice(0, secondSpace) + ", " + strBeautDate.slice(secondSpace, strBeautDate.length);
+                    $html.find('.lcb-date-text').text(strBeautDate);
                 }
             });
 
