@@ -41,13 +41,13 @@
             this.render();
         },
         add: function(room) {
-            if (room.name.search("ext") == -1)
+            if (room.isExternal == false)
             {
                 this.$el.find('.lcb-tab-external').before(this.template(room));
             }
             else
             {
-                this.$el.append(this.template(room));   
+                this.$el.append(this.template(room));
             }
         },
         remove: function(id) {

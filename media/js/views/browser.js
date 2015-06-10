@@ -60,7 +60,7 @@
                 context = _.extend(room, {
                     lastActive: moment(room.lastActive).calendar()
                 });
-            if (context.external == true)
+            if (context.isExternal == true)
             {
                 this.$('.lcb-rooms-list').append(this.template(context));
             }
@@ -103,7 +103,7 @@
             });
             $items.detach();
             $items.each(function () {
-                if (that.rooms.get($(this).data('id')).attributes.name.search("ext") !== -1)
+                if (that.rooms.get($(this).data('id')).attributes.isExternal == true)
                 {
                     that.$('.lcb-rooms-list').append(this);
                 }
