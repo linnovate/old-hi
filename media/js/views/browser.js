@@ -35,24 +35,37 @@
                 if (id !== 'list') return;
                 this.sort();
             }, this);
+
+            // Get all users
+            this.users = window.client.getUsersSync().map(function (user){
+                return {
+                    id: user.id,
+                    username: user.attributes.username
+                };
+            })
+
+            // Remove current user
+            this.users = this.users.filter(function(user){
+                if(user.id != window.client.user.id)
+                    return true;
+                return false;
+            });
+
+            // Map users by username
+            this.usernames = this.users.map(function(user) {
+                return user.username;
+            });
         },
 
         getAutocomplete: function(){
 
-            // Get all users
-            var users = window.client.getUsersSync();
-
-            // Map users by username
-            var usernames = users.map(function(user) {
-                return user.attributes.username;
-            });
-
+            var that = this;
             // Apply autocomplete on the participants input
             $(".lcb-new-room-participants").autocomplete({
                 source: function( request, response ) {
                     // delegate back to autocomplete, but extract the last term
                     response( $.ui.autocomplete.filter(
-                        usernames, _extractLast( request.term ) ) );
+                        that.usernames, _extractLast( request.term ) ) );
                 },
                 focus: function() {
                     // prevent value inserted on focus
@@ -201,16 +214,16 @@
                     }
 
                     data.participants = [];
-                    var par = {};
-                    for(var i = 0; i<window.client.users.length;i++){
-                        par[window.client.users.models[i].attributes.username] =
-                            window.client.users.models[i].attributes.id;
-                    }
 
-                    // Add participants to save
-                    for(var i = 0; i<participants_arr.length; i++){
-                        if(par[participants_arr[i]])
-                        data.participants.push(par[participants_arr[i]]);
+                    for(var i = 0; i < participants_arr.length; i++){
+                        var user = $.grep(that.users, function(user){
+                            return user.username == participants_arr[i];
+                        });
+
+
+                        if(user.length > 0){
+                            data.participants.push(user[0].id);
+                        }
                     }
                 }
             }
