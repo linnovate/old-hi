@@ -84,10 +84,10 @@
                         </a>
                     </li>
                     <li class="lcb-tab-internal">
-                        internal
+                        <$ __('Internal') $>
                     </li>
                     <li class="lcb-tab-external">
-                        external
+                        <$ __('External') $>
                     </li>
                 </ul>
             </div>
@@ -109,12 +109,12 @@
                     </a>
                 </header>
                 <ul class="lcb-rooms-list">
-                    <li>
-                        <h1>internal</h1>
+                    <li class="lcb-rooms-list-internal">
+                        <$ __('Internal') $>
                         <hr />
                     </li>
                     <li class="lcb-rooms-list-external">
-                        <h1>external</h1>
+                        <$ __('External') $>
                         <hr />
                     </li>
                 </ul>
@@ -131,6 +131,5 @@
         <% include 'includes/modals/xmpp.html' %>
         <% include 'includes/modals/tokens.html' %>
         <% include 'includes/modals/upload.html' %>
-        <% include 'includes/modals/giphy.html' %>
     </div><!-- lcb-client end -->
 <% endblock %>

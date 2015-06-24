@@ -300,6 +300,12 @@
     Client.prototype.appendRoom = function(room,users){
         var that = this;
         var newRoom  = this.addRoom(room);
+
+        var room1 = that.rooms.get(room.id);
+        if (room1 && room1.get('joined')) {
+            return;
+        }
+
         newRoom.set('joined', true);
         this.setUsers(newRoom.id, users);
 

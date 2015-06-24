@@ -14,7 +14,8 @@
             'submit .lcb-rooms-add': 'create',
             'keyup .lcb-rooms-browser-filter-input': 'filter',
             'change .lcb-rooms-switch': 'toggle',
-            'click .lcb-rooms-switch-label': 'toggle'
+            'click .lcb-rooms-switch-label': 'toggle',
+            'focus .lcb-new-room-participants': 'getAutocomplete'
         },
         initialize: function(options) {
             this.client = options.client;
@@ -34,6 +35,54 @@
                 if (id !== 'list') return;
                 this.sort();
             }, this);
+
+            // Get all users
+            this.users = window.client.getUsersSync().map(function (user){
+                return {
+                    id: user.id,
+                    username: user.attributes.username
+                };
+            })
+
+            // Remove current user
+            this.users = this.users.filter(function(user){
+                if(user.id != window.client.user.id)
+                    return true;
+                return false;
+            });
+
+            // Map users by username
+            this.usernames = this.users.map(function(user) {
+                return user.username;
+            });
+        },
+
+        getAutocomplete: function(){
+
+            var that = this;
+            // Apply autocomplete on the participants input
+            $(".lcb-new-room-participants").autocomplete({
+                source: function( request, response ) {
+                    // delegate back to autocomplete, but extract the last term
+                    response( $.ui.autocomplete.filter(
+                        that.usernames, _extractLast( request.term ) ) );
+                },
+                focus: function() {
+                    // prevent value inserted on focus
+                    return false;
+                },
+                select: function( event, ui ) {
+                    var terms = _split( this.value );
+                    // remove the current input
+                    terms.pop();
+                    // add the selected item
+                    terms.push( ui.item.value );
+                    // add placeholder to get the comma-and-space at the end
+                    terms.push( "" );
+                    this.value = terms.join( ", " );
+                    return false;
+                }
+            });
         },
         updateToggles: function(room, joined) {
             this.$('.lcb-rooms-switch[data-id=' + room.id + ']').prop('checked', joined);
@@ -132,6 +181,7 @@
                 $description = this.$('.lcb-room-description'),
                 $password = this.$('.lcb-room-password'),
                 $confirmPassword = this.$('.lcb-room-confirm-password'),
+                $participants = this.$('.lcb-new-room-participants'),
                 $private = this.$('.lcb-room-private'),
                 data = {
                     name: $name.val().trim(),
@@ -144,6 +194,39 @@
                         $form.trigger('reset');
                     }
                 };
+
+            // Check if the room is private
+            if(data.private){
+
+                // Check if participants are listed
+                if($participants.val().trim()) {
+
+                    // Temp array for splitting participants by ','
+                    var temp = $participants.val().trim().split(',');
+                    var participants_arr = [];
+
+                    for(var i = 0; i < temp.length ; i++){
+                        // Check if element is not empty
+                        if(temp[i].trim()){
+                            // Trim and push the element to participants array
+                            participants_arr.push(temp[i].trim());
+                        }
+                    }
+
+                    data.participants = [];
+
+                    for(var i = 0; i < participants_arr.length; i++){
+                        var user = $.grep(that.users, function(user){
+                            return user.username == participants_arr[i];
+                        });
+
+
+                        if(user.length > 0){
+                            data.participants.push(user[0].id);
+                        }
+                    }
+                }
+            }
 
             $name.parent().removeClass('has-error');
             $slug.parent().removeClass('has-error');
@@ -192,4 +275,13 @@
 
     });
 
+    function _split( val ) {
+        return val.split( /,\s*/ );
+    }
+    function _extractLast( term ) {
+        return _split( term ).pop();
+    }
+
+
 }(window, $, _);
+

@@ -198,7 +198,8 @@ module.exports = function() {
                 slug: req.param('slug'),
                 description: req.param('description'),
                 private: req.param('private'),
-                password: req.param('password')
+                password: req.param('password'),
+                participants: req.param('participants'),
             };
 
             if (!settings.private) {
