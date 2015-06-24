@@ -70,3 +70,6 @@ rooms:
 
 i18n:
   locale: he
+
+avatars:
+  providers: [initials] # or [gravatar, initials] for both initials and gravatar option
