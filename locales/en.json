@@ -74,5 +74,7 @@
 	"Slug": "Slug",
 	"XMPP/Jabber": "XMPP/Jabber",
 	"Private?": "Private?",
-	"Empty for public room": "Empty for public room"
+	"Empty for public room": "Empty for public room",
+	"Superusers": "Superusers",
+	"Transcript for": "Transcript for"
 }

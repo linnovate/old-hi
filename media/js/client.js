@@ -65,6 +65,7 @@
             description: data.description,
             password: data.password,
             participants: data.participants,
+            superusers: data.superusers,
             private: data.private
         };
         var callback = data.callback;
@@ -278,6 +279,52 @@
         // Remove room id from localstorage
         RoomStore.remove(id);
     };
+    // Fire user from unauthorized room changed by jo
+    Client.prototype.fireUser = function(roomId){
+        var room = this.rooms.get(roomId);
+        if (room) {
+            room.set('joined', false);
+            room.lastMessage.clear();
+            if (room.get('hasPassword')) {
+                room.users.set([]);
+            }
+        }
+        if (roomId === this.rooms.current.get('id')) {
+            var lastRoom = this.rooms.get(this.rooms.last.get('id'));
+            this.switchRoom(lastRoom && lastRoom.get('joined') ? lastRoom.id : '');
+        }
+        this.rooms.remove(room.id);
+        swal('Unauthorized Room', 'you are not authorized to see room ' + room.attributes.name, 'error');
+    };
+    // Append user to room that he receive permission to it changed by jo
+    Client.prototype.appendRoom = function(room,users){
+        var that = this;
+        var newRoom  = this.addRoom(room);
+        newRoom.set('joined', true);
+        this.setUsers(newRoom.id, users);
+
+        this.getMessages({
+            room: newRoom.id,
+            since_id: newRoom.lastMessage.get('id'),
+            take: 200,
+            expand: 'owner, room',
+            reverse: true
+        }, function(messages) {
+            messages.reverse();
+            that.addMessages(messages, !newRoom.lastMessage.get('id'));
+            newRoom.lastMessage && newRoom.lastMessage.set(messages[messages.length - 1]);
+        });
+
+        if (this.options.filesEnabled) {
+            this.getFiles({
+                room: newRoom.id,
+                take: 15
+            }, function(files) {
+                files.reverse();
+                that.setFiles(room.id, files);
+            });
+        }
+    };
     Client.prototype.getRoomUsers = function(id, callback) {
         this.socket.emit('rooms:users', {
             room: id
@@ -463,16 +510,19 @@
                 return room.id;
             });
 
-            var openRooms = RoomStore.get();
-            // Let's open some rooms!
-            _.defer(function() {
-                //slow down because router can start a join with no password
-                _.each(openRooms, function(id) {
-                    if (_.contains(roomIds, id)) {
-                        that.joinRoom({ id: id });
-                    }
-                });
-            }.bind(this));
+            // Get user's enabled rooms from server changed by jo
+            that.socket.emit('rooms:user', function(rooms) {
+                var openRooms = rooms;
+                // Let's open some rooms!
+                _.defer(function () {
+                    //slow down because router can start a join with no password
+                    _.each(openRooms, function (id) {
+                        if (_.contains(roomIds, id)) {
+                            that.joinRoom({id: id});
+                        }
+                    });
+                }.bind(this));
+            });
         }
 
         var path = '/' + _.compact(
@@ -510,6 +560,13 @@
         });
         this.socket.on('rooms:archive', function(room) {
             that.roomArchive(room);
+        });
+        // changed by jo
+        this.socket.on('rooms:fire', function(roomId){
+           that.fireUser(roomId);
+        });
+        this.socket.on('rooms:append',function(room,users){
+            that.appendRoom(room,users);
         });
         this.socket.on('users:join', function(user) {
             that.addUser(user);

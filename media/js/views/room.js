@@ -66,6 +66,7 @@
             this.atwhoRooms();
             this.atwhoEmotes();
             this.selectizeParticipants();
+            this.selectizeSuperusers();
         },
         atwhoTplEval: function(tpl, map) {
             var error;
@@ -170,11 +171,43 @@
             var opts = _.extend(options, { at: '@'});
             this.$('.lcb-entry-participants').atwho(opts);
             this.$('.lcb-room-participants').atwho(opts);
+            this.$('.lcb-entry-superusers').atwho(opts);
+            this.$('.lcb-room-superusers').atwho(opts);
         },
         selectizeParticipants: function () {
             var that = this;
 
             this.$('.lcb-entry-participants').selectize({
+                delimiter: ',',
+                create: false,
+                load: function(query, callback) {
+                    if (!query.length) return callback();
+
+                    var users = that.client.getUsersSync();
+
+                    var usernames = users.map(function(user) {
+                        return user.attributes.username;
+                    });
+
+                    usernames = _.filter(usernames, function(username) {
+                        return username.indexOf(query) !== -1;
+                    });
+
+                    users = _.map(usernames, function(username) {
+                        return {
+                            value: username,
+                            text: username
+                        };
+                    });
+
+                    callback(users);
+                }
+            });
+        },
+        selectizeSuperusers: function () {
+            var that = this;
+
+            this.$('.lcb-entry-superusers').selectize({
                 delimiter: ',',
                 create: false,
                 load: function(query, callback) {
@@ -247,18 +280,21 @@
             this.$('.lcb-room-heading .slug').text('#' + this.model.get('slug'));
             this.$('.lcb-room-description').text(this.model.get('description'));
             this.$('.lcb-room-participants').text(this.model.get('participants'));
+            this.$('.lcb-room-superusers').text(this.model.get('superusers'));
         },
         sendMeta: function(e) {
             this.model.set({
                 name: this.$('.lcb-room-heading').text(),
                 description: this.$('.lcb-room-description').text(),
-                participants: this.$('.lcb-room-participants').text()
+                participants: this.$('.lcb-room-participants').text(),
+                superusers: this.$('.lcb-room-superusers').text()
             });
             this.client.events.trigger('rooms:update', {
                 id: this.model.id,
                 name: this.model.get('name'),
                 description: this.model.get('description'),
-                participants: this.model.get('participants')
+                participants: this.model.get('participants'),
+                superusers: this.model.get('superusers')
             });
         },
         showEditRoom: function(e) {
@@ -296,7 +332,8 @@
                 $password = $modal.find('input[name="password"]'),
                 $confirmPassword = $modal.find('input[name="confirmPassword"]'),
                 $participants =
-                    this.$('.edit-room textarea[name="participants"]');
+                    this.$('.edit-room textarea[name="participants"]'),
+                $superusers = this.$('.edit-room textarea[name="superusers"]');
 
             $name.parent().removeClass('has-error');
             $confirmPassword.parent().removeClass('has-error');
@@ -316,7 +353,8 @@
                 name: $name.val(),
                 description: $description.val(),
                 password: $password.val(),
-                participants: $participants.val()
+                participants: $participants.val(),
+                superusers: $superusers.val()
             });
 
             $modal.modal('hide');
@@ -374,7 +412,7 @@
             message.mentioned = new RegExp('\\B@(' + this.client.user.get('username') + '|all)(?!@)\\b', 'i').test(message.text);
 
             // Check if this is the first message to this date
-            if ((this.lastMessagePosted == undefined) || 
+            if ((this.lastMessagePosted == undefined) ||
                 (this.lastMessagePosted.format("YYYY-MM-DD") !== posted.format("YYYY-MM-DD") && !message.fragment))
             {
                 message.isFirst = true;

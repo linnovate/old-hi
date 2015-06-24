@@ -37,10 +37,18 @@ var RoomSchema = new mongoose.Schema({
 		ref: 'User',
         required: true
     },
+    superusers: [{
+        type: ObjectId,
+        ref: 'User'
+    }],
     participants: [{ // We can have an array per role
 		type: ObjectId,
 		ref: 'User'
 	}],
+    enabledMembers:[{
+        type: ObjectId,
+        ref: 'User'
+    }],
 	messages: [{
 		type: ObjectId,
 		ref: 'Message'
@@ -110,20 +118,24 @@ RoomSchema.method('isAuthorized', function(userId) {
         return true;
     }
 
-    return this.participants.some(function(participant) {
-        if (participant._id) {
-            return participant._id.equals(userId);
+    // Check also if user have authorization for superusers changed by jo
+    var AuthorizedUsers = [];
+    AuthorizedUsers = this.participants.concat(this.superusers);
+
+    return AuthorizedUsers.some(function(AuthorizedUser) {
+        if (AuthorizedUser._id) {
+            return AuthorizedUser._id.equals(userId);
         }
 
-        if (participant.equals) {
-            return participant.equals(userId);
+        if (AuthorizedUser.equals) {
+            return AuthorizedUser.equals(userId);
         }
 
-        if (participant.id) {
-            return participant.id === userId;
+        if (AuthorizedUser.id) {
+            return AuthorizedUser.id === userId;
         }
 
-        return participant === userId;
+        return AuthorizedUser === userId;
     });
 });
 
@@ -186,12 +198,18 @@ RoomSchema.method('toJSON', function(user) {
         owner: room.owner,
         private: room.private,
         hasPassword: this.hasPassword,
-        participants: []
+        participants: [],
+        superusers: []
     };
 
     if (room.private && authorized) {
         var participants = this.participants || [];
+        var superusers = this.superusers || [];
         data.participants = participants.map(function(user) {
+            return user.username ? user.username : user;
+        });
+        // changed by jo
+        data.superusers = superusers.map(function(user) {
             return user.username ? user.username : user;
         });
     }

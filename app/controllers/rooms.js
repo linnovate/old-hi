@@ -43,10 +43,10 @@ module.exports = function() {
 
     var getEmitters = function(room) {
         if (room.private && !room.hasPassword) {
-            var connections = core.presence.connections.query({
+            var connections = core.presence.system.connections.query({
                 type: 'socket.io'
             }).filter(function(connection) {
-                return room.isAuthorized(connection.user);
+                return room.isAuthorized(connection.user.id);
             });
 
             return connections.map(function(connection) {
@@ -81,6 +81,37 @@ module.exports = function() {
         emitters.forEach(function(e) {
             e.emitter.emit('rooms:archive', room.toJSON(e.user));
         });
+    });
+
+    core.on('rooms:remove_connections', function(unauthorized,room){
+        for (var i = 0; i < unauthorized.length; i++){
+            var userConnections = core.presence.system.connections.query({
+                type: 'socket.io',
+                userId: unauthorized[i].toString()
+            });
+
+            for (var j = 0; j < userConnections.length; j++){
+                core.presence.leave(userConnections[j],room.id);
+                userConnections[j].socket.leave(room.id);
+                userConnections[j].socket.emit('rooms:fire',room.id);
+            }
+        }
+    });
+
+    core.on('rooms:append_connections', function(newAuthorized,room){
+        for (var i = 0; i < newAuthorized.length; i++){
+            var userConnections = core.presence.system.connections.query({
+                type: 'socket.io',
+                userId: newAuthorized[i]._id
+            });
+
+            for (var j = 0; j < userConnections.length; j++){
+                core.presence.join(userConnections[j],room); // update already connected users
+                userConnections[j].socket.join(room.id); // connect user in order to recive and send messages, without taking room meta data
+                var users = getEmitters(room).map(function(e){return e.user;});
+                userConnections[j].socket.emit('rooms:append',room.toJSON(newAuthorized[i]._id),users);
+            }
+        }
     });
 
 
@@ -193,12 +224,14 @@ module.exports = function() {
                     description: req.param('description'),
                     password: req.param('password'),
                     participants: req.param('participants'),
+                    superusers: req.param('superusers'),
                     user: req.user
                 };
 
             if (!settings.private) {
                 delete options.password;
                 delete options.participants;
+                delete options.superusers;
             }
 
             core.rooms.update(roomId, options, function(err, room) {
@@ -269,6 +302,14 @@ module.exports = function() {
                 var user = req.user.toJSON();
                 user.room = room._id;
 
+                // Push user to room's enabled members
+                core.rooms.pushUser(options.userId.toString(), options.id, function (err) {
+                    if (err) {
+                        console.error(err);
+                        return res.sendStatus(400);
+                    }
+                });
+
                 core.presence.join(req.socket.conn, room);
                 req.socket.join(room._id);
                 res.json(room.toJSON(req.user));
@@ -277,7 +318,24 @@ module.exports = function() {
         leave: function(req, res) {
             var roomId = req.data;
             var user = req.user.toJSON();
-            user.room = roomId;
+
+            // Remove user from room enabled users changed by jo
+            core.rooms.get(roomId,function(err, room){
+                if (err)
+                {
+                    console.log(err);
+                    return res.sendStatus(400);
+                }
+
+                core.rooms.pullUser(user.id.toString(), roomId, function (err) {
+                    if (err) {
+                        console.error(err);
+                        return res.sendStatus(400);
+                    }
+                });
+
+                user.room = roomId; // why we need that? jo
+            });
 
             core.presence.leave(req.socket.conn, roomId);
             req.socket.leave(roomId);
@@ -306,6 +364,26 @@ module.exports = function() {
                         });
 
                 res.json(users);
+            });
+        },
+        // Get user enabled rooms changed by jo
+        user: function(req,res){
+            var userId = req.user._id.toString();
+
+            core.rooms.getUserRooms(userId, function(err, rooms){
+                if (err)
+                {
+                    console.log(err);
+                    return res.sendStatus(400);
+                }
+
+                var roomsId = [];
+                for (var i = 0; i < rooms.length; i++)
+                {
+                    roomsId.push(rooms[i]._id.toString());
+                }
+
+                res.json(roomsId);
             });
         }
     });
