@@ -107,9 +107,9 @@ module.exports = function() {
 
             for (var j = 0; j < userConnections.length; j++){
                 core.presence.join(userConnections[j],room); // update already connected users
-                userConnections[j].socket.join(room.id); // connect user in order to recive and send messages, without taking room meta data
+                userConnections[j].socket.join(room.id); // connect user in order to receive and send messages, without taking room meta data
                 var users = getEmitters(room).map(function(e){return e.user;});
-                userConnections[j].socket.emit('rooms:append',room.toJSON(newAuthorized[i]._id),users);
+                userConnections[j].socket.emit('rooms:append',room.toJSON(newAuthorized[i].id),users);
             }
         }
     });

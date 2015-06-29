@@ -229,6 +229,7 @@ RoomManager.prototype.create = function(options, cb) {
 
 RoomManager.prototype.update = function(roomId, options, cb) {
     var Room = mongoose.model('Room');
+    var that = this;
 
     Room.findById(roomId, function(err, room) {
         if (err) {
@@ -308,13 +309,19 @@ RoomManager.prototype.update = function(roomId, options, cb) {
                     room = room;// why we need that? jo
 
                     if (room.private){
-                        // Remove unauthorized connections from room and append the new authorized
-                        // connections. changed by jo
-                        this.core.emit('rooms:remove_connections', unauthorizedUsers, room);
-                        this.core.emit('rooms:append_connections', newAuthorizedUsers, room);
+                        // Update room's online users
+                        Room.populate(room,{path:'participants superusers'},function(err,room){
+                            // Remove unauthorized connections from room and append the new authorized
+                            // connections. changed by jo
+                            that.core.emit('rooms:remove_connections', unauthorizedUsers, room);
+                            that.core.emit('rooms:append_connections', newAuthorizedUsers, room);
+                            that.core.emit('rooms:update', room);
+                        });
+                    }
+                    else {
+                        this.core.emit('rooms:update', room);
                     }
                     cb(null, room);
-                    this.core.emit('rooms:update', room);
                 }.bind(this));
             }.bind(this));
         }.bind(this));

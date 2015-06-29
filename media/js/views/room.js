@@ -166,7 +166,8 @@
                 }
             };
 
-            this.$('.lcb-entry-input').atwho(options);
+            //changed by jo for current version in order to prevent sending message to person that isn't room member
+            //this.$('.lcb-entry-input').atwho(options);
 
             var opts = _.extend(options, { at: '@'});
             this.$('.lcb-entry-participants').atwho(opts);
@@ -306,12 +307,35 @@
                 $name = $modal.find('input[name="name"]'),
                 $description = $modal.find('textarea[name="description"]'),
                 $password = $modal.find('input[name="password"]'),
-                $confirmPassword = $modal.find('input[name="confirmPassword"]');
+                $confirmPassword = $modal.find('input[name="confirmPassword"]'),
+                $participantsTextarea = $modal.find('textarea[name="participants"]'),
+                $superusersTextarea = $modal.find('textarea[name="superusers"]');
 
             $name.val(this.model.get('name'));
             $description.val(this.model.get('description'));
             $password.val('');
             $confirmPassword.val('');
+
+            // Build the options for selectize so addItems will work properly
+            var participants = this.model.get('participants');
+            var superusers = this.model.get('superusers');
+            var participantsOptions = [];
+            var superusersOptions = [];
+
+            for (var i = 0; i < participants.length; i++){
+                participantsOptions.push({text:participants[i],value:participants[i]});
+            }
+
+            for (var j = 0; j < superusers.length; j++){
+                superusersOptions.push({text:superusers[j],value:superusers[j]});
+            }
+
+            $participantsTextarea[0].selectize.clear();
+            $superusersTextarea[0].selectize.clear();
+            $participantsTextarea[0].selectize.addOption(participantsOptions);
+            $superusersTextarea[0].selectize.addOption(superusersOptions);
+            $participantsTextarea[0].selectize.addItems(participants);
+            $superusersTextarea[0].selectize.addItems(superusers);
 
             $modal.modal();
         },
