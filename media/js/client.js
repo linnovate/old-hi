@@ -124,13 +124,16 @@
     Client.prototype.updateRoom = function(room) {
         this.socket.emit('rooms:update', room);
     };
-    Client.prototype.roomUpdate = function(resRoom) {
+    Client.prototype.roomUpdate = function(resRoom,users) {
         var room = this.rooms.get(resRoom.id);
         if (!room) {
             this.addRoom(resRoom);
             return;
         }
         room.set(resRoom);
+
+        if (users.length > 0)
+            this.setUsers(resRoom.id,users);
     };
     Client.prototype.addRoom = function(room) {
         var r = this.rooms.get(room.id);
@@ -416,7 +419,16 @@
             // No room
             return;
         }
-        room.users.add(user);
+
+        var target = room.users.findWhere({
+            id: user.id
+        });
+        if (!target){
+            room.users.add(user);
+        }
+        else{
+            this.enableDisableUser(user);
+        }
     };
     Client.prototype.removeUser = function(user) {
         var room = this.rooms.get(user.room);
@@ -438,6 +450,18 @@
             });
             target && target.set(user);
         }, this);
+    };
+    Client.prototype.enableDisableUser = function(user){
+        var room = this.rooms.get(user.room);
+        if (!room) {
+            // No room
+            return;
+        }
+
+        var target = room.users.findWhere({
+            id: user.id
+        });
+        target && target.set(user);
     };
     Client.prototype.getUsersSync = function() {
         if (this.users.length) {
@@ -561,8 +585,8 @@
         this.socket.on('rooms:new', function(data) {
             that.addRoom(data);
         });
-        this.socket.on('rooms:update', function(room) {
-            that.roomUpdate(room);
+        this.socket.on('rooms:update', function(room,users) {
+            that.roomUpdate(room,users);
         });
         this.socket.on('rooms:archive', function(room) {
             that.roomArchive(room);
@@ -583,6 +607,9 @@
         this.socket.on('users:update', function(user) {
             that.updateUser(user);
         });
+        this.socket.on('users:disconnected', function(user){
+            that.enableDisableUser(user);
+        })
         this.socket.on('files:new', function(file) {
             that.addFile(file);
         });

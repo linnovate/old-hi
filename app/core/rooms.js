@@ -310,12 +310,10 @@ RoomManager.prototype.update = function(roomId, options, cb) {
 
                     if (room.private){
                         // Update room's online users
-                        Room.populate(room,{path:'participants superusers'},function(err,room){
+                        Room.populate(room,{path:'enabledMembers participants superusers'},function(err,room){
                             // Remove unauthorized connections from room and append the new authorized
                             // connections. changed by jo
-                            that.core.emit('rooms:remove_connections', unauthorizedUsers, room);
-                            that.core.emit('rooms:append_connections', newAuthorizedUsers, room);
-                            that.core.emit('rooms:update', room);
+                            that.core.emit('rooms:update', room, unauthorizedUsers, newAuthorizedUsers);
                         });
                     }
                     else {
@@ -399,9 +397,8 @@ RoomManager.prototype.list = function(options, cb) {
         find.sort('-lastActive');
     }
 
-    find.populate('participants');
     // changed by jo
-    find.populate('superusers');
+    find.populate('participants superusers enabledMembers');
 
     find.exec(function(err, rooms) {
         if (err) {

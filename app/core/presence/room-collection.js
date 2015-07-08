@@ -14,6 +14,7 @@ function RoomCollection() {
 
     this.onJoin = this.onJoin.bind(this);
     this.onLeave = this.onLeave.bind(this);
+    this.onDisconnected = this.onDisconnected.bind(this);
 }
 
 util.inherits(RoomCollection, EventEmitter);
@@ -38,6 +39,7 @@ RoomCollection.prototype.getOrAdd = function(room) {
         });
         pRoom.on('user_join', this.onJoin);
         pRoom.on('user_leave', this.onLeave);
+        pRoom.on('user_disconnected', this.onDisconnected);
     }
     return pRoom;
 };
@@ -50,6 +52,10 @@ RoomCollection.prototype.onLeave = function(data) {
     this.emit('user_leave', data);
 };
 
+RoomCollection.prototype.onDisconnected = function(data) {
+    this.emit('user_disconnected', data);
+};
+
 RoomCollection.prototype.usernameChanged = function(data) {
     Object.keys(this.rooms).forEach(function(key) {
         this.rooms[key].usernameChanged(data);
@@ -58,7 +64,8 @@ RoomCollection.prototype.usernameChanged = function(data) {
 
 RoomCollection.prototype.removeConnection = function(connection) {
     Object.keys(this.rooms).forEach(function(key) {
-        this.rooms[key].removeConnection(connection);
+        // changed by jo in order to present user in room's users list like disconnected
+        this.rooms[key].removeDisconnectedConnection(connection);
     }, this);
 };
 

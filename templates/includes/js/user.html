@@ -2,6 +2,10 @@
     <li class="lcb-room-sidebar-item lcb-room-sidebar-user" data-id="{{id}}">
         <img class="lcb-avatar lcb-room-sidebar-user-avatar lcb-room-poke" src="/users/{{username}}/avatar" width="30" height="30" />
         <div class="lcb-room-sidebar-user-meta lcb-room-poke">
+            {{#if isConnected}}
+                <div class="lcb-room-sidebar-user-online">
+                </div>
+            {{/if}}
             <span class="lcb-room-sidebar-user-name">
                 {{displayName}}
             </span>

@@ -214,9 +214,27 @@ RoomSchema.method('toJSON', function(user) {
         });
     }
 
-    if (this.users) {
-        data.users = this.users;
-        data.userCount = this.users.length;
+    if (this.users){
+        var connectedUsers = this.users;
+        data.users = room.enabledMembers.map(function(member){
+            var user = {
+                id: member.id,
+                displayName: member.displayName,
+                username: member.username,
+                firstName: member.firstName,
+                lastName: member.lastName,
+                avatar: member.avatar
+            };
+
+            for (var i = 0; i < connectedUsers.length; i++){
+                if(connectedUsers[i].id == user.id)
+                    user.isConnected = true;
+            }
+
+            return user;
+        });
+
+        data.userCount = room.enabledMembers.length;
     }
 
     return data;

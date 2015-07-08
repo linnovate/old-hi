@@ -41,7 +41,7 @@
             this.render();
         },
         add: function(room) {
-            if (room.isExternal == false)
+            if (!room.isExternal)
             {
                 this.$el.find('.lcb-tab-external').before(this.template(room));
             }

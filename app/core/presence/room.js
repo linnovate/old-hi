@@ -31,8 +31,10 @@ function Room(options) {
 
     this.emitUserJoin = this.emitUserJoin.bind(this);
     this.emitUserLeave = this.emitUserLeave.bind(this);
+    this.emitUserDisconnected = this.emitUserDisconnected.bind(this);
     this.addConnection = this.addConnection.bind(this);
     this.removeConnection = this.removeConnection.bind(this);
+    this.removeDisconnectedConnection = this.removeDisconnectedConnection.bind(this);
 }
 
 util.inherits(Room, EventEmitter);
@@ -92,6 +94,26 @@ Room.prototype.emitUserLeave = function(data) {
     this.emit('user_leave', d);
 };
 
+Room.prototype.emitUserDisconnected = function(data) {
+    this.userCount--;
+
+    var d = {
+        user: data.user,
+        userId: data.userId,
+        username: data.username
+    };
+
+    if (this.system) {
+        d.system = true;
+    } else {
+        d.roomId = this.roomId;
+        d.roomSlug = this.roomSlug;
+        d.roomHasPassword = this.hasPassword;
+    }
+
+    this.emit('user_disconnected', d);
+};
+
 Room.prototype.usernameChanged = function(data) {
     if (this.containsUser(data.userId)) {
         // User leaving room
@@ -107,14 +129,14 @@ Room.prototype.usernameChanged = function(data) {
     }
 };
 
-Room.prototype.addConnection = function(connection) {
+Room.prototype.addConnection = function(connection,dontEmit) {
     if (!connection) {
         console.error('Attempt to add an invalid connection was detected');
         return;
     }
 
     if (connection.user && connection.user.id &&
-        !this.containsUser(connection.user.id)) {
+        !this.containsUser(connection.user.id) && !dontEmit) {
         // User joining room
         this.emitUserJoin({
             user: connection.user,
@@ -125,7 +147,26 @@ Room.prototype.addConnection = function(connection) {
     this.connections.add(connection);
 };
 
-Room.prototype.removeConnection = function(connection) {
+Room.prototype.removeConnection = function(connection,dontEmit) {
+    if (!connection) {
+        console.error('Attempt to remove an invalid connection was detected');
+        return;
+    }
+
+    if (this.connections.remove(connection)) {
+        if (connection.user && connection.user.id &&
+            !this.containsUser(connection.user.id) && !dontEmit) {
+            // Leaving room altogether
+            this.emitUserLeave({
+                user: connection.user,
+                userId: connection.user.id,
+                username: connection.user.username
+            });
+        }
+    }
+};
+
+Room.prototype.removeDisconnectedConnection = function(connection) {
     if (!connection) {
         console.error('Attempt to remove an invalid connection was detected');
         return;
@@ -135,7 +176,7 @@ Room.prototype.removeConnection = function(connection) {
         if (connection.user && connection.user.id &&
             !this.containsUser(connection.user.id)) {
             // Leaving room altogether
-            this.emitUserLeave({
+            this.emitUserDisconnected({
                 user: connection.user,
                 userId: connection.user.id,
                 username: connection.user.username

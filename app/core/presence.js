@@ -14,6 +14,7 @@ function PresenceManager(options) {
     this.users = new UserCollection({ core: this.core });
     this.rooms.on('user_join', this.onJoin.bind(this));
     this.rooms.on('user_leave', this.onLeave.bind(this));
+    this.rooms.on('user_disconnected', this.onDisconnected.bind(this));
 
     this.connect = this.connect.bind(this);
     this.getUserCountForRoom = this.getUserCountForRoom.bind(this);
@@ -47,15 +48,15 @@ PresenceManager.prototype.disconnect = function(connection) {
     this.rooms.removeConnection(connection);
 };
 
-PresenceManager.prototype.join = function(connection, room) {
+PresenceManager.prototype.join = function(connection, room,dontEmit) {
     var pRoom = this.rooms.getOrAdd(room);
-    pRoom.addConnection(connection);
+    pRoom.addConnection(connection,dontEmit);
 };
 
-PresenceManager.prototype.leave = function(connection, roomId) {
+PresenceManager.prototype.leave = function(connection, roomId,dontEmit) {
     var room = this.rooms.get(roomId);
     if (room) {
-        room.removeConnection(connection);
+        room.removeConnection(connection,dontEmit);
     }
 };
 
@@ -65,6 +66,10 @@ PresenceManager.prototype.onJoin = function(data) {
 
 PresenceManager.prototype.onLeave = function(data) {
     this.core.emit('presence:user_leave', data);
+};
+
+PresenceManager.prototype.onDisconnected = function(data) {
+    this.core.emit('presence:user_disconnected', data);
 };
 
 PresenceManager.Connection = Connection;

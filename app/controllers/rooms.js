@@ -17,6 +17,8 @@ module.exports = function() {
         User.findById(data.userId, function (err, user) {
             if (!err && user) {
                 user = user.toJSON();
+                // changed by jo in order to present user like logged-in in room's users list
+                user.isConnected = true;
                 user.room = data.roomId;
                 if (data.roomHasPassword) {
                     app.io.to(data.roomId).emit('users:join', user);
@@ -36,6 +38,21 @@ module.exports = function() {
                     app.io.to(data.roomId).emit('users:leave', user);
                 } else {
                     app.io.emit('users:leave', user);
+                }
+            }
+        });
+    });
+
+    core.on('presence:user_disconnected', function(data) {
+        User.findById(data.userId, function (err, user) {
+            if (!err && user) {
+                user = user.toJSON();
+                user.isConnected = false;
+                user.room = data.roomId;
+                if (data.roomHasPassword) {
+                    app.io.to(data.roomId).emit('users:disconnected', user);
+                } else {
+                    app.io.emit('users:disconnected', user);
                 }
             }
         });
@@ -69,10 +86,59 @@ module.exports = function() {
         });
     });
 
-    core.on('rooms:update', function(room) {
-        var emitters = getEmitters(room);
-        emitters.forEach(function(e) {
-            e.emitter.emit('rooms:update', room.toJSON(e.user));
+    core.on('rooms:update', function(room,unauthorizedUsers, newAuthorizedUsers) {
+        var onLineUsers = getEmitters(room);
+        var dontEmit = true;
+        var users = [];
+
+        if(unauthorizedUsers) {
+            users = room.enabledMembers.map(function (member) {
+                var user = {
+                    id: member.id,
+                    displayName: member.displayName,
+                    username: member.username,
+                    firstName: member.firstName,
+                    lastName: member.lastName,
+                    avatar: member.avatar
+                };
+
+                for (var i = 0; i < onLineUsers.length; i++) {
+                    if (onLineUsers[i].user.id == user.id)
+                        user.isConnected = true;
+                }
+
+                return user;
+            });
+
+            for (var i = 0; i < unauthorizedUsers.length; i++) {
+                var userConnections = core.presence.system.connections.query({
+                    type: 'socket.io',
+                    userId: unauthorizedUsers[i].toString()
+                });
+
+                for (var j = 0; j < userConnections.length; j++) {
+                    core.presence.leave(userConnections[j], room.id, dontEmit);
+                    userConnections[j].socket.leave(room.id);
+                    userConnections[j].socket.emit('rooms:fire', room.id);
+                }
+            }
+
+            for (i = 0; i < newAuthorizedUsers.length; i++) {
+                userConnections = core.presence.system.connections.query({
+                    type: 'socket.io',
+                    userId: newAuthorizedUsers[i]._id
+                });
+
+                for (j = 0; j < userConnections.length; j++) {
+                    core.presence.join(userConnections[j], room, dontEmit); // update already connected users
+                    userConnections[j].socket.join(room.id); // connect user in order to receive and send messages, without taking room meta data
+                    userConnections[j].socket.emit('rooms:append', room.toJSON(newAuthorizedUsers[i].id), users);
+                }
+            }
+        }
+
+        onLineUsers.forEach(function(e) {
+            e.emitter.emit('rooms:update', room.toJSON(e.user),users);
         });
     });
 
@@ -82,38 +148,6 @@ module.exports = function() {
             e.emitter.emit('rooms:archive', room.toJSON(e.user));
         });
     });
-
-    core.on('rooms:remove_connections', function(unauthorized,room){
-        for (var i = 0; i < unauthorized.length; i++){
-            var userConnections = core.presence.system.connections.query({
-                type: 'socket.io',
-                userId: unauthorized[i].toString()
-            });
-
-            for (var j = 0; j < userConnections.length; j++){
-                core.presence.leave(userConnections[j],room.id);
-                userConnections[j].socket.leave(room.id);
-                userConnections[j].socket.emit('rooms:fire',room.id);
-            }
-        }
-    });
-
-    core.on('rooms:append_connections', function(newAuthorized,room){
-        for (var i = 0; i < newAuthorized.length; i++){
-            var userConnections = core.presence.system.connections.query({
-                type: 'socket.io',
-                userId: newAuthorized[i]._id
-            });
-
-            for (var j = 0; j < userConnections.length; j++){
-                core.presence.join(userConnections[j],room); // update already connected users
-                userConnections[j].socket.join(room.id); // connect user in order to receive and send messages, without taking room meta data
-                var users = getEmitters(room).map(function(e){return e.user;});
-                userConnections[j].socket.emit('rooms:append',room.toJSON(newAuthorized[i].id),users);
-            }
-        }
-    });
-
 
     //
     // Routes
