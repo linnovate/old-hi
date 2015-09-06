@@ -226,8 +226,9 @@ module.exports = function() {
             });
         },
         create: function(req, res) {
+
             var options = {
-                owner: req.user._id,
+                owner: req.param('owner') || req.user._id,
                 name: req.param('name'),
                 slug: req.param('slug'),
                 description: req.param('description'),
