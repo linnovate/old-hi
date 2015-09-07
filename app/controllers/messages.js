@@ -46,7 +46,7 @@ module.exports = function() {
     app.io.route('messages', {
         create: function(req, res) {
             var options = {
-                    owner: req.param('owner'),
+                    owner: req.param('owner')|| req.user._id,
                     room: req.param('room'),
                     text: req.param('text')
                 };
