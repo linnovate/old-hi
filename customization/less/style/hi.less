@@ -1,0 +1,194 @@
+body{
+	background: #E8EAF6;
+	overflow: hidden;
+}
+
+a{
+	color: #1E88E5;
+}
+
+.lcb-client{
+	min-height: 400px;
+	min-width: 600px;
+	position: absolute;
+	background: transparent;
+	padding: 2em 8em 1.5em 8em;
+	margin: 0;
+	
+	a{
+		text-decoration: initial;
+	}
+}
+
+.hi-toolbar{
+	width: 100%;
+	height: 50px;
+	background: #1565C0;
+	padding-left: 100px;
+	padding-right: 100px;
+	padding-top: 1px;
+	
+	.dropdown{
+		position: rrelative;
+		width: 17%;
+	}
+	
+	.dropdown-menu.dropdown-menu-right{
+		z-index: 9999;
+	}
+}
+
+.hi-toolbar-support{
+	width: 100%;
+	height: 200px;
+	background: #1E88E5;
+	position: absolute;
+	top: 0;
+	
+	// Cool Texture
+	background-color: #1E88E5;
+	background-image: repeating-linear-gradient(120deg, rgba(255,255,255,0.1), rgba(255,255,255,0.1) 1px, transparent 1px, transparent 60px),
+					  repeating-linear-gradient(120deg, rgba(255,255,255,0.1), rgba(255,255,255,0.1) 1px, transparent 1px, transparent 60px),
+					  linear-gradient(60deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.1) 75%, rgba(0,0,0,0.1)),
+					  linear-gradient(120deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.1) 75%, rgba(0,0,0,0.1));
+    background-size: 70px 120px;
+}
+
+.lcb-room-header{
+	color: black;
+	background: #E8EAF6;
+	padding: 15px 40px;
+	padding-bottom: 0;
+	min-height: 70px;
+	max-height: 70px;
+	height: 70px;
+}
+
+.lcb-room-heading{
+	float: right;
+	font-size: 25pt;
+	
+	.lcb-room-description{
+		color: #999;
+		font-size: 12pt;
+		vertical-align: middle;
+	}
+}
+
+.lcb-room-heading .name{
+	padding-right: 40px;
+	margin-left: 20px;
+	max-width: 100%;
+}
+
+.lcb-links{
+	float: left;
+}
+
+.lcb-panes{
+	border-right: 1px solid #efefef;
+	min-width: 400px;
+	box-shadow: 0 0 8px 0 rgba(0,0,0,0.55);
+}
+
+.lcb-room-list{
+	overflow-y: initial;
+}
+
+/*************** Navbar **********/
+#main-nav{
+	z-index: 10001;
+	width: 20%;
+	height: 100%;
+	position: initial;
+	overflow: hidden;
+	-webkit-transition: all 0.2s ease-in-out;
+	transition: all 0.2s ease-in-out;
+	left: 0;
+	display: block;
+	background: #2196f3;
+	min-width: 200px;
+	border-left: 1px solid #efefef;
+	box-shadow: 0 0 8px 0 rgba(0,0,0,0.55);
+}
+
+#main-nav.show{
+	width: 20% !important;
+	visibility: visible !important;
+}
+
+#nav-header{
+	width: 100%;
+	height: 70px;
+	background: #1565C0;
+	padding: 1em;
+	padding-top: 4em;
+	position: rrelative;
+}
+
+#nav-header.nav-show{
+	opacity: 1;
+}
+
+#nav-list{
+	position: relative;
+	height: 100%;
+	padding-left: 2em;
+	padding-right: 2em;
+	width: 100%;
+	float: left;
+	background: white;
+}
+
+#nav-list > a{
+	height: 7%;
+	padding: 0;
+}
+
+#nav-list a{
+	display: block;
+	width: 100%;
+	padding: 1.2em 0;
+	-webkit-transition: color 0.2s ease-in-out;
+	transition: color 0.2s ease-in-out;
+	color: #1E88E5;
+}
+
+#nav-list a:hover{
+	color: #111;
+}
+
+#nav-list.nav-show{
+	opacity: 1;
+}
+
+.hi-dropdown{
+	position: absolute;
+	width: 100%;
+	bottom: 0;
+	padding-bottom: 1em;
+}
+
+/*********** Sidebar Rooms *********/
+.lcb-tab-title{
+	padding-right: 4em;
+}
+
+.lcb-tab{
+	filter: alpha(opacity=100);
+	-webkit-opacity: 1;
+	-moz-opacity: 1;
+	opacity: 1;
+	height: initial;
+	line-height: initial;
+	
+	a{
+		background: #efefef;
+	}
+}
+
+#nav-list ul{
+	padding: 0;
+	margin-left: -2em;
+	margin-right: -2em;
+}
