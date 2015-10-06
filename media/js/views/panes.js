@@ -41,26 +41,32 @@
             this.render();
         },
         add: function(room) {
-            if (!room.isExternal)
+            room.iAmOwner = window.client.user.id == room.owner;
+            if (room.isExternal)
             {
-                this.$el.find('.lcb-tab-external').before(this.template(room));
+                $('.lcb-tab-external').append(this.template(room));
+                $('#hi-external-groups-list').append(this.template(room));
             }
-            else
-            {
-                this.$el.append(this.template(room));
+            else if(room.direct) {
+                $('.lcb-tab-direct-messages li:eq(0)').before(this.template(room));
+                $('#hi-direct-messages-list').append(this.template(room));
+            }
+            else{
+                $('.lcb-tab-internal').append(this.template(room));
+                $('#hi-groups-list').append(this.template(room));
             }
         },
         remove: function(id) {
-            this.$el.find('.lcb-tab[data-id=' + id + ']').remove();
+            $('.lcb-tab[data-id=' + id + ']').remove();
         },
         update: function(room) {
-            this.$el.find('.lcb-tab[data-id=' + room.id + '] .lcb-tab-title').text(room.get('name'));
+            $('.lcb-tab[data-id=' + room.id + '] .lcb-tab-title').text(room.get('name'));
         },
         switch: function(id) {
             if (!id) {
                 id = 'list';
             }
-            this.$el.find('.lcb-tab').removeClass('selected')
+            $('.lcb-tab').removeClass('selected')
                 .filter('[data-id=' + id + ']').addClass('selected');
         },
         leave: function(e) {
@@ -69,7 +75,7 @@
             this.client.events.trigger('rooms:leave', id);
         },
         alert: function(message) {
-            var $tab = this.$('.lcb-tab[data-id=' + message.room.id + ']'),
+            var $tab = $('.lcb-tab[data-id=' + message.room.id + ']'),
                 $total = $tab.find('.lcb-tab-alerts-total'),
                 $mentions = $tab.find('.lcb-tab-alerts-mentions');
             if (message.historical || $tab.length === 0
@@ -89,7 +95,7 @@
             }
         },
         clearAlerts: function(id) {
-            var $tab = this.$('.lcb-tab[data-id=' + id + ']'),
+            var $tab = $('.lcb-tab[data-id=' + id + ']'),
                 $total = $tab.find('.lcb-tab-alerts-total'),
                 $mentions = $tab.find('.lcb-tab-alerts-mentions');
             $tab.data('count-total', 0).data('count-mentions', 0);
@@ -134,12 +140,13 @@
             if (!id) {
                 id = 'list';
             }
-            var $pane = this.$el.find('.lcb-pane[data-id=' + id + ']');
+            var $pane = $('.lcb-pane[data-id=' + id + ']');
             $pane.removeClass('hide').siblings().addClass('hide');
             $(window).width() > 767 && $pane.find('[autofocus]').focus();
             this.views[id] && this.views[id].scrollMessages(true);
         },
         add: function(room) {
+            room.iAmOwner = room.get('owner') == window.client.user.id;
             if (this.views[room.id]) {
                 // Nothing to do, this room is already here
                 return;

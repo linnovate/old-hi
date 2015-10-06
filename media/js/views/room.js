@@ -20,18 +20,20 @@
             'click .hide-edit-room': 'hideEditRoom',
             'click .submit-edit-room': 'submitEditRoom',
             'click .archive-room': 'archiveRoom',
-            'click .lcb-room-poke': 'poke',
+            //'click .lcb-room-poke': 'poke',
+            'click .lcb-room-poke': 'directMessage',
             'click .lcb-upload-trigger': 'upload'
         },
         initialize: function(options) {
             this.client = options.client;
 
             var iAmOwner = this.model.get('owner') === this.client.user.id;
-            var iCanEdit = iAmOwner || !this.model.get('hasPassword');
+            var iCanEdit = iAmOwner || ($.inArray(this.client.user.get('username'),this.model.get('superusers'))!== -1);
 
             this.model.set('iAmOwner', iAmOwner);
             this.model.set('iCanEdit', iCanEdit);
-
+            this.model.set('inIframe', this.client.options.iframe);
+            
             this.template = options.template;
             this.messageTemplate =
                 Handlebars.compile($('#template-message').html());
@@ -65,8 +67,9 @@
             this.atwhoAllMentions();
             this.atwhoRooms();
             this.atwhoEmotes();
-            this.selectizeParticipants();
-            this.selectizeSuperusers();
+            
+            this.attachSelectize('.lcb-entry-participants');
+            this.attachSelectize('.lcb-entry-superusers');
         },
         atwhoTplEval: function(tpl, map) {
             var error;
@@ -131,7 +134,7 @@
             }
             var options = {
                 at: '@',
-                tpl: '<li data-value="@${username}"><img src="https://www.gravatar.com/avatar/${avatar}?s=20" height="20" width="20" /> @${username} <small>${displayName}</small></li>',
+                tpl: '<li data-value="@${username}"><img src="/users/${username}/avatar?s=20" height="20" width="20" /> @${username} <small>${displayName}</small></li>',
                 callbacks: {
                     filter: this.getAtwhoUserFilter(this.model.users),
                     sorter: sorter,
@@ -158,7 +161,7 @@
 
             var options = {
                 at: '@@',
-                tpl: '<li data-value="@${username}"><img src="https://www.gravatar.com/avatar/${avatar}?s=20" height="20" width="20" /> @${username} <small>${displayName}</small></li>',
+                tpl: '<li data-value="@${username}"><img src="/users/${username}/avatar?s=20" height="20" width="20" /> @${username} <small>${displayName}</small></li>',
                 callbacks: {
                     filter: filter,
                     sorter: sorter,
@@ -175,40 +178,10 @@
             this.$('.lcb-entry-superusers').atwho(opts);
             this.$('.lcb-room-superusers').atwho(opts);
         },
-        selectizeParticipants: function () {
+        attachSelectize: function (textareaElement) {
             var that = this;
 
-            this.$('.lcb-entry-participants').selectize({
-                delimiter: ',',
-                create: false,
-                load: function(query, callback) {
-                    if (!query.length) return callback();
-
-                    var users = that.client.getUsersSync();
-
-                    var usernames = users.map(function(user) {
-                        return user.attributes.username;
-                    });
-
-                    usernames = _.filter(usernames, function(username) {
-                        return username.indexOf(query) !== -1;
-                    });
-
-                    users = _.map(usernames, function(username) {
-                        return {
-                            value: username,
-                            text: username
-                        };
-                    });
-
-                    callback(users);
-                }
-            });
-        },
-        selectizeSuperusers: function () {
-            var that = this;
-
-            this.$('.lcb-entry-superusers').selectize({
+            this.$(textareaElement).selectize({
                 delimiter: ',',
                 create: false,
                 load: function(query, callback) {
@@ -386,25 +359,49 @@
             $modal.modal('hide');
         },
         archiveRoom: function(e) {
+            if (this.model.attributes.owner != window.client.user.id){
+                swal('Error archiving room', 'Only owner can archive room.');
+            }
+            else{
+                var that = this;
+                swal({
+                    title: 'Archive "' +
+                        this.model.get('name') + '"?',
+                    text: "You will not be able to open it!",
+                    type: "error",
+                    confirmButtonText: "Archive",
+                    allowOutsideClick: true,
+                    confirmButtonColor: "#D32F2F",
+                    showCancelButton: true,
+                    closeOnConfirm: true,
+                }, function(isConfirm) {
+                    if (isConfirm) {
+                        that.$('.lcb-room-edit').modal('hide');
+                        that.client.events.trigger('rooms:archive', {
+                            room: that.model.id
+                        });
+                    }
+                });
+            }
             var that = this;
             swal({
-                title: 'Do you really want to archive "' +
-                       this.model.get('name') + '"?',
-                text: "You will not be able to open it!",
-                type: "error",
-                confirmButtonText: "Yes, I'm sure",
-                allowOutsideClick: true,
-                confirmButtonColor: "#DD6B55",
-                showCancelButton: true,
-                closeOnConfirm: true,
-            }, function(isConfirm) {
-                if (isConfirm) {
-                    that.$('.lcb-room-edit').modal('hide');
-                    that.client.events.trigger('rooms:archive', {
-                        room: that.model.id
-                    });
-                }
-            });
+                    title: 'Archive "' +
+                        this.model.get('name') + '"?',
+                    text: "You will not be able to open it!",
+                    type: "error",
+                    confirmButtonText: "Archive",
+                    allowOutsideClick: true,
+                    confirmButtonColor: "#D32F2F",
+                    showCancelButton: true,
+                    closeOnConfirm: true,
+                }, function(isConfirm) {
+                    if (isConfirm) {
+                        that.$('.lcb-room-edit').modal('hide');
+                        that.client.events.trigger('rooms:archive', {
+                            room: that.model.id
+                        });
+                    }
+                });
         },
         sendMessage: function(e) {
             if (e.type === 'keypress' && e.keyCode !== 13 || e.altKey) return;
@@ -439,8 +436,7 @@
 
             // Check if this is the first message to this date
             if ((this.lastMessagePosted == undefined) ||
-                (this.lastMessagePosted.format("YYYY-MM-DD") !== posted.format("YYYY-MM-DD") && !message.fragment))
-            {
+                (this.lastMessagePosted.format("YYYY-MM-DD") !== posted.format("YYYY-MM-DD") && !message.fragment)) {
                 message.isFirst = true;
             }
 
@@ -461,8 +457,7 @@
                     window.utils.eggs.message(message.text);
                 }
 
-                if (message.isFirst)
-                {
+                if (message.isFirst){
                     var strBeautDate = posted.format("LL");
                     var secondSpace = strBeautDate.lastIndexOf(" ");
                     strBeautDate = strBeautDate.slice(0, secondSpace) + ", " + strBeautDate.slice(secondSpace, strBeautDate.length);
@@ -526,6 +521,17 @@
                 text = $.trim($input.val()),
                 at = (text.length > 0 ? ' ' : '') + '@' + user.get('username') + ' '
             $input.val(text + at).focus();
+        },
+        directMessage: function(e){
+          var $target = $(e.currentTarget),
+              $root = $target.closest('[data-id],[data-owner]'),
+              id = $root.data('owner') || $root.data('id'),
+              user = this.model.users.findWhere({
+                  id: id
+              });
+              if(!user) return;
+              
+              window.client.createDirectMessage(user);
         },
         upload: function(e) {
             e.preventDefault();

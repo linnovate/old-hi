@@ -15,7 +15,8 @@
             'keyup .lcb-rooms-browser-filter-input': 'filter',
             'change .lcb-rooms-switch': 'toggle',
             'click .lcb-rooms-switch-label': 'toggle',
-            'focus .lcb-new-room-participants': 'getAutocomplete'
+            'click #lcb-add-room [data-dismiss="modal"]': 'cancelRoomCreation',
+            'click .lcb-room-alert': 'turnAlert'
         },
         initialize: function(options) {
             this.client = options.client;
@@ -36,56 +37,24 @@
                 this.sort();
             }, this);
 
-            // Get all users
-            this.users = window.client.getUsersSync().map(function (user){
-                return {
-                    id: user.id,
-                    username: user.attributes.username
-                };
-            })
-
-            // Remove current user
-            this.users = this.users.filter(function(user){
-                if(user.id != window.client.user.id)
-                    return true;
-                return false;
-            });
-
-            // Map users by username
-            this.usernames = this.users.map(function(user) {
-                return user.username;
-            });
-        },
-
-        getAutocomplete: function(){
-
-            var that = this;
-            // Apply autocomplete on the participants input
-            $(".lcb-new-room-participants").autocomplete({
-                source: function( request, response ) {
-                    // delegate back to autocomplete, but extract the last term
-                    response( $.ui.autocomplete.filter(
-                        that.usernames, _extractLast( request.term ) ) );
-                },
-                focus: function() {
-                    // prevent value inserted on focus
-                    return false;
-                },
-                select: function( event, ui ) {
-                    var terms = _split( this.value );
-                    // remove the current input
-                    terms.pop();
-                    // add the selected item
-                    terms.push( ui.item.value );
-                    // add placeholder to get the comma-and-space at the end
-                    terms.push( "" );
-                    this.value = terms.join( ", " );
-                    return false;
-                }
-            });
+            this.attachSelectize('.lcb-new-room-participants');
+            
+            this.attachSelectize('.lcb-new-room-superusers');
+            
+            $('.modal-trigger').leanModal();
         },
         updateToggles: function(room, joined) {
             this.$('.lcb-rooms-switch[data-id=' + room.id + ']').prop('checked', joined);
+        },
+        togglePrivateRoom: function(e){
+          if(!e.currentTarget.checked){
+              $('.lcb-new-room-superusers').addClass('hide');
+              $('.lcb-new-room-participants').addClass('hide');
+          }  
+          else{
+              $('.lcb-new-room-superusers').removeClass('hide');
+              $('.lcb-new-room-participants').removeClass('hide');
+          }
         },
         toggle: function(e) {
             e.preventDefault();
@@ -104,18 +73,42 @@
                 this.client.joinRoom(room);
             }
         },
+        turnAlert: function(e){
+          var $noteIcon = $(e.currentTarget),
+              id = $noteIcon.data('id');  
+              
+          if (!this.rooms.get(id)){
+              return;
+          }
+          
+          if($noteIcon.hasClass('fa-bell-slash')){
+              $noteIcon.removeClass('fa-bell-slash');
+              $noteIcon.addClass('fa-bell');
+          }
+          else {
+              $noteIcon.removeClass('fa-bell');
+              $noteIcon.addClass('fa-bell-slash');
+          }
+          
+          // Change the status of room's notification in db
+          this.client.turnNotification(id);
+        },
         add: function(room) {
             var room = room.toJSON ? room.toJSON() : room,
                 context = _.extend(room, {
                     lastActive: moment(room.lastActive).calendar()
                 });
-            if (context.isExternal == true)
-            {
-                this.$('.lcb-rooms-list').append(this.template(context));
+            context.activeAlert = ($.inArray(room.id, this.client.user.attributes.alertedRooms) > -1);
+            if (context.isExternal) {
+                this.$('.lcb-rooms-list-external').append(this.template(context));
+            }
+            else if(context.direct){
+                //this.$('.lcb-rooms-list-direct').append(this.template(context));
+                // Do nothing   
             }
             else
             {
-                this.$('.lcb-rooms-list-external').before(this.template(context));
+                this.$('.lcb-rooms-list-internal').append(this.template(context));
             }
         },
         remove: function(room) {
@@ -152,13 +145,14 @@
             });
             $items.detach();
             $items.each(function () {
-                if (that.rooms.get($(this).data('id')).attributes.isExternal == true)
-                {
-                    that.$('.lcb-rooms-list').append(this);
+                if (that.rooms.get($(this).data('id')).attributes.isExternal) {
+                    that.$('.lcb-rooms-list-external').append(this);
                 }
-                else
-                {
-                    that.$('.lcb-rooms-list-external').before(this);
+                else if(that.rooms.get($(this).data('id')).attributes.direct){
+                    //that.$('lcb-rooms-list-direct').append(this);
+                }
+                else {
+                    that.$('.lcb-rooms-list-internal').append(this);
                 }
             });
         },
@@ -171,6 +165,59 @@
                 $(this).toggle(haystack.indexOf(needle) >= 0);
             });
         },
+        attachSelectize: function(textareaElement){
+          var that = this;
+          
+          this.$(textareaElement).selectize({
+             delimiter: ',',
+             create: false,
+             load: function(query, callback){
+                 if(!query.length) return callback();
+                 
+                 var users = that.client.getUsersSync();
+                 
+                 var usernames = users.map(function(user){
+                     return user.attributes.username;
+                 });
+                 
+                 usernames = _.filter(usernames, function(username){
+                     return username.indexOf(query) !== -1;
+                 });
+                 
+                 users = _.map(usernames, function(username){
+                     return {
+                         value: username,
+                         text: username
+                     };
+                 });
+                 
+                 callback(users);
+             } 
+          });
+        },
+        cancelRoomCreation: function(e){
+          var $form = $(e.target.form);
+          
+          swal({
+             title: 'Discard changes ?',
+             text:'Changes won\'t be saved!',
+             confirmButton: 'Discard',
+             allowOutsideClick: false,
+             type: 'warning',
+             confirmButtomColor: '#F57C00',
+             showCancelButton: true,
+             closeOnConfirm: true,
+          }, function(isConfirm){
+            if(isConfirm){
+                $form.trigger('reset');
+                $('#lcb-add-room textarea.lcb-new-room-participants').selectize()[0].selectize.clear();
+                $('#lcb-add-room textarea.lcb-new-room-superusers').selectize()[0].selectize.clear();
+            }
+            else {
+                $('#lcb-add-room').modal('show');
+            }
+          }); 
+        },
         create: function(e) {
             var that = this;
             e.preventDefault();
@@ -182,50 +229,28 @@
                 $password = this.$('.lcb-room-password'),
                 $confirmPassword = this.$('.lcb-room-confirm-password'),
                 $participants = this.$('.lcb-new-room-participants'),
-                $private = this.$('.lcb-room-private'),
+                $superusers = this.$('lcb-new-room-superusers'),
+                //$private = this.$('.lcb-room-private'), prevent public room
                 data = {
                     name: $name.val().trim(),
-                    slug: $slug.val().trim(),
+                    // slug: $slug.val().trim(), // TODO : data.slug
                     description: $description.val(),
                     password: $password.val(),
-                    private: !!$private.prop('checked'),
+                    private: true,// !!$private.prop('checked'), prevent public room
                     callback: function success() {
                         $modal.modal('hide');
                         $form.trigger('reset');
+                        $('#lcb-add-room textarea.lcb-new-room-participants').selectize()[0].selectize.clear();
+                        $('#lcb-add-room textarea.lcb-new-room-superusers').selectize()[0].selectize.clear();
                     }
                 };
 
             // Check if the room is private
             if(data.private){
 
-                // Check if participants are listed
-                if($participants.val().trim()) {
-
-                    // Temp array for splitting participants by ','
-                    var temp = $participants.val().trim().split(',');
-                    var participants_arr = [];
-
-                    for(var i = 0; i < temp.length ; i++){
-                        // Check if element is not empty
-                        if(temp[i].trim()){
-                            // Trim and push the element to participants array
-                            participants_arr.push(temp[i].trim());
-                        }
-                    }
-
-                    data.participants = [];
-
-                    for(var i = 0; i < participants_arr.length; i++){
-                        var user = $.grep(that.users, function(user){
-                            return user.username == participants_arr[i];
-                        });
-
-
-                        if(user.length > 0){
-                            data.participants.push(user[0].id);
-                        }
-                    }
-                }
+                data.participants = $participants.val();
+                
+                data.superusers = $superusers.val();
             }
 
             $name.parent().removeClass('has-error');
@@ -235,10 +260,12 @@
             // we require name is non-empty
             if (!data.name) {
                 $name.parent().addClass('has-error');
+                swal('Room creation', 'Room name can not be empty');
                 return;
             }
-
-            // we require slug is non-empty
+            
+            data.slug = Date.now().toString();
+            // TODO : we require slug is non-empty
             if (!data.slug) {
                 $slug.parent().addClass('has-error');
                 return;
@@ -265,12 +292,42 @@
             this.client.events.trigger('rooms:create', data);
         },
         addUser: function(user, room) {
-            this.$('.lcb-rooms-list-item[data-id="' + room.id + '"]')
-                .find('.lcb-rooms-list-users').prepend(this.userTemplate(user.toJSON()));
+            var room_users =
+                this.$('.lcb-rooms-list-item[data-id="' + room.id + '"]')
+                    .find('.lcb-rooms-list-users');
+                    
+            // Get 
+            var current_users = room_users.find('#user.chip').length;
+            if(current_users < 4){
+                room_users.prepend(this.userTemplate(user.toJSON()));
+            }
+            else{
+                var room_users_addition = room_users.find('#'+room.id);
+                if(room_users_addition.length != 0){
+                    var num = parseInt(room_users_addition.text()) || 0;
+                    room_users_addition.text((num + 1) + ' more');
+                }
+                else{
+                    room_users.append('<label id="'+room.id+'" class="hi-more-users">1 more</label>');
+                }
+            }
         },
         removeUser: function(user, room) {
             this.$('.lcb-rooms-list-item[data-id="' + room.id + '"]')
-                .find('.lcb-rooms-list-user[data-id="' + user.id + '"]').remove();
+                .find('#user.chip[data-id="' + user.id + '"]').remove();
+                
+            var room_users = 
+                this.$('lcb-rooms-list-item[data-id="'+room.id+'"]')
+                    .find('.lcb-rooms-list-users');
+            var current_users = room_users.find('#user.chip').length;
+            var room_users_all = room_users.find('#'+room.id);
+            
+            var num = parseInt(room_users_all.text()) || 0;
+            if(num -1 <= 0){
+                room_users_all.text('');
+                return;
+            }
+            room_users_all.text((num - 1) + ' more');
         }
 
     });

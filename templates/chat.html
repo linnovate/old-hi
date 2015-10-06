@@ -18,107 +18,117 @@
 <% endblock %>
 
 <% block body %>
+    <div class="hi-toolbar-support theme blue darken-1"></div>
     <div id="lcb-client" class="lcb-client">
-        <div class="lcb-header">
-            <button type="button" class="btn lcb-header-toggle">
-                <i class="fa fa-bars"></i>
-            </button>
-            <div class="lcb-header-logo">Let's Chat</div>
-        </div>
-        <section class="lcb-sidebar">
-            <div class="dropdown">
-                <a class="lcb-account-button dropdown-toggle" data-toggle="dropdown" href="3">
-                    <img class="lcb-account-button-avatar lcb-avatar" src="/users/<$ account.username $>/avatar" width="50" height="50" />
-                    <span class="lcb-account-button-name"><$ account.displayName $></span>
-                    <span class="lcb-account-button-username">@<$ account.username $></span>
-                    <i class="lcb-account-button-chevron fa fa-chevron-down"></i>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-right">
-                    <li>
-                        <a data-toggle="modal" href="#lcb-profile">
-                            <i class="fa fa-fw fa-edit"></i> <$ __('Edit Profile') $>
-                        </a>
-                    </li>
-                    <li>
-                        <a data-toggle="modal" href="#lcb-account">
-                            <i class="fa fa-fw fa-cogs"></i> <$ __('Account Settings') $>
-                        </a>
-                    </li>
-                    <li>
-                        <a data-toggle="modal" href="#lcb-notifications">
-                            <i class="fa fa-fw fa-bell"></i> <$ __('Notifications') $>
-                        </a>
-                    </li>
-                    <% if settings.xmpp.enable %>
+        <nav id="main-nav">
+            <div id="nav-header" class="theme blue darken-3">
+                <div class="hi-dropdown dropdown">
+                    <a class="lcb-account-button dropdown-toggle" data-toggle="dropdown" href="3">
+                        <img class="lcb-account-button-avatar lcb-avatar" src="/users/<$ account.username $>/avatar" width="50" height="50"/>
+                        <span class="lcb-account-button-name"><$ account.displayName $></span>
+                        <span class="lcb-account-button-username">@<$ account.username $></span>
+                        <i class="lcb-account-button-chevron fa fa-chevron-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-right">
                         <li>
-                            <a data-toggle="modal" href="#lcb-xmpp">
-                                <i class="fa fa-fw fa-comments"></i> <$ __('XMPP/Jabber') $>
+                            <a data-toggle="modal" href="#lcb-profile">
+                                <i class="fa fa-fw fa-edit"></i> <$ __('Edit Profile') $>
                             </a>
                         </li>
-                    <% endif %>
-                    <li>
-                        <a data-toggle="modal" href="#lcb-tokens">
-                            <i class="fa fa-fw fa-lock"></i> <$ __('Auth Tokens') $>
-                        </a>
-                    </li>
-                    <li class="divider"></li>
-                    <li><a href="./logout"><i class="fa fa-fw fa-sign-out"></i> <$ __('Logout') $></a></li>
+                        <li>
+                            <a data-toggle="modal" href="#lcb-account">
+                                <i class="fa fa-fw fa-cogs"></i> <$ __('Account Settings') $>
+                            </a>
+                        </li>
+                        <li>
+                            <a data-toggle="modal" href="#lcb-notifications">
+                                <i class="fa fa-fw fa-bell"></i> <$ __('Notifications') $>
+                            </a>
+                        </li>
+                        <% if settings.xmpp.enable %>
+                            <li>
+                                <a data-toggle="modal" href="#lcb-xmpp">
+                                    <i class="fa fa-fw fa-comments"></i> <$ __('XMPP/Jabber') $>
+                                </a>
+                            </li>
+                        <% endif %>
+                        <li>
+                            <a data-toggle="modal" href="#lcb-tokens">
+                                <i class="fa fa-fw fa-lock"></i> <$ __('Auth Tokens') $>
+                            </a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="./logout"><i class="fa fa-fw fa-sign-out"></i> <$ __('Logout') $></a></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="nav-list">
+                <a href="#!/">
+                    <i class="fa fa-th"></i>
+                    <label><$ __('All Groups') $></label>
+                </a>
+                <label class="tab-header"><$ __('Groups') $></label>
+                <ul id="hi-groups-list">
+                </ul>
+                
+                <label class="tab-header"><$ __('External Groups') $></label>
+                <ul id="hi-external-groups-list">
+                </ul>
+                <label class="tab-header"><$ __('Direct Messages') $></label>
+                <ul id="hi-direct-message-list">
                 </ul>
             </div>
-            <div class="lcb-status-indicators">
-                <span class="lcb-status-indicator lcb-status-indicator-error lcb-status-connection" data-status="disconnected" style="display: none;">
-                    <i class="fa fa-plug"></i> <$ __('Disconnected') $>
-                </span>
-                <span class="lcb-status-indicator lcb-status-connection" data-status="connected" style="display: none;">
-                    <i class="fa fa-refresh"></i> <$ __('Connected') $>
-                </span>
-                <span class="lcb-status-indicator lcb-status-connection" style="display: none;">
-                    <i class="fa fa-bell-slash"></i>
-                </span>
-            </div>
-            <div class="lcb-tabs-outer">
-                <ul class="lcb-tabs">
-                    <li data-id="list" class="lcb-tab lcb-tab-home">
-                        <a href="#!/">
-                            <i class="fa fa-th"></i>
-                        </a>
-                    </li>
-                    <li class="lcb-tab-internal">
-                        <$ __('Internal') $>
-                    </li>
-                    <li class="lcb-tab-external">
-                        <$ __('External') $>
-                    </li>
-                </ul>
-            </div>
-        </section>
+        </nav>
         <section class="lcb-panes">
             <div class="lcb-rooms-browser lcb-pane hide" data-id="list">
                 <header class="lcb-rooms-browser-header">
-                    <h2 class="lcb-rooms-browser-heading">
-                        <$ __('All Rooms') $>
-                    </h2>
+                    <h4 class="lcb-rooms-browser-heading">
+                        <$ __('All Groups') $>
+                    </h4>
                     <div class="lcb-rooms-browser-filter">
                         <label class="lcb-rooms-browser-filter-label" for="lcb-rooms-browser-filter-input">
                             <i class="fa fa-search"></i>
                         </label>
                         <input id="lcb-rooms-browser-filter-input" class="lcb-rooms-browser-filter-input" type="search" autofocus />
                     </div>
-                    <a class="btn btn-success lcb-rooms-browser-new" data-toggle="modal" data-target="#lcb-add-room" href="#!/rooms/add">
+                    
+                    <!-- Float add button -->
+                    <div class="fixed-action-btn" style="bottom: 45px;">
+                        <a class="btn-floating btn-large red">
+                            <i class="waves-effect waves-light large material-icons fa fa-plus"></i>
+                        </a>
+                        <ul>
+                            <li>
+                                <a class="waves-effect waves-light btn-floating green modal-trigger tooltipped" 
+                                   data-position="right" data-tooltip="<$ __('New Direct Message') $>" 
+                                   href="#directMessageModal">
+                                    <i class="material-icons fa fa-user"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="waves-effect waves-light btn-floating blue tooltipped" 
+                                   data-position="right" data-tooltip="<$ __('New Group') $>" 
+                                   data-target="#lcb-add-room" href="#!/rooms/add">
+                                   <i class="material-icons fa fa-users"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                                          
+                    <!--<a class="btn btn-success lcb-rooms-browser-new" data-toggle="modal" data-target="#lcb-add-room" href="#!/rooms/add">
                         <i class="fa fa-plus"></i>
-                    </a>
+                    </a>-->
                 </header>
                 <ul class="lcb-rooms-list">
-                    <li class="lcb-rooms-list-internal">
-                        <$ __('Internal') $>
-                        <hr />
-                    </li>
-                    <li class="lcb-rooms-list-external">
-                        <$ __('External') $>
-                        <hr />
-                    </li>
+                    <ul class="lcb-rooms-list-internal">
+                        <label class="title"><$ __('Groups') $></label>
+                    </ul>
+                    <ul class="lcb-rooms-list-external">
+                        <label class="title"><$ __('External Groups') $></label>
+                    </ul>
                 </ul>
                 <% include 'includes/modals/add-room.html' %>
+                <% include 'includes/modals/add-direct-message.html' %>
                 <% include 'includes/modals/password.html' %>
             </div>
         </section>

@@ -31,7 +31,7 @@ var UserSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true,
+        required: false,
         trim: true,
         lowercase: true,
         unique: true,
@@ -86,6 +86,9 @@ var UserSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    lastLogOut: {
+        type: Date
+    },
     rooms: [{
 		type: ObjectId,
 		ref: 'Room'
@@ -93,7 +96,11 @@ var UserSchema = new mongoose.Schema({
 	messages: [{
 		type: ObjectId,
 		ref: 'Message'
-	}]
+	}],
+    alertedRooms: [{
+        type: ObjectId,
+        ref: 'Room'
+    }]
 }, {
     toObject: {
         virtuals: true
@@ -264,8 +271,8 @@ UserSchema.plugin(uniqueValidator, {
 // EXPOSE ONLY CERTAIN FIELDS
 // It's really important that we keep
 // stuff like password private!
-UserSchema.method('toJSON', function() {
-    return {
+UserSchema.method('toJSON', function(getAlertedRooms) {
+    var userData = {
         id: this._id,
         firstName: this.firstName,
         lastName: this.lastName,
@@ -273,6 +280,12 @@ UserSchema.method('toJSON', function() {
         displayName: this.displayName,
         avatar: this.avatar
     };
+    
+    if(getAlertedRooms){
+        userData.alertedRooms = this.alertedRooms;
+    }
+    
+    return userData;
 });
 
 module.exports = mongoose.model('User', UserSchema);

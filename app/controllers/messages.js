@@ -8,6 +8,7 @@ module.exports = function() {
 
     var app = this.app,
         core = this.core,
+        settings = require('./../config'),
         middlewares = this.middlewares;
 
     core.on('messages:new', function(message, room, user) {
@@ -46,10 +47,14 @@ module.exports = function() {
     app.io.route('messages', {
         create: function(req, res) {
             var options = {
-                    owner: req.param('owner')|| req.user._id,
+                    owner: req.user._id.toString(),
                     room: req.param('room'),
                     text: req.param('text')
                 };
+
+            if (options.owner == settings.auth.icapi.id){
+                options.owner = req.param('owner');
+            }
 
             core.messages.create(options, function(err, message) {
                 if (err) {

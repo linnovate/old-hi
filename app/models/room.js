@@ -16,8 +16,8 @@ var RoomSchema = new mongoose.Schema({
         required: true,
         trim: true,
         lowercase: true,
-        unique: true,
-        match: /^[a-z0-9_]+$/i
+        unique: true
+        //match: /^[a-z0-9_]+$/i
     },
     archived: {
         type: Boolean,
@@ -49,6 +49,10 @@ var RoomSchema = new mongoose.Schema({
         type: ObjectId,
         ref: 'User'
     }],
+    isExternal:{
+      type: Boolean,
+      default: false  
+    },
 	messages: [{
 		type: ObjectId,
 		ref: 'Message'
@@ -64,6 +68,14 @@ var RoomSchema = new mongoose.Schema({
     private: {
         type: Boolean,
         default: false
+    },
+    direct: {
+        type: Boolean,
+        default: false
+    },
+    directName: {
+        type: String,
+        trim: true  
     },
     password: {
         type: String,
@@ -120,7 +132,8 @@ RoomSchema.method('isAuthorized', function(userId) {
 
     // Check also if user have authorization for superusers changed by jo
     var AuthorizedUsers = [];
-    AuthorizedUsers = this.participants.concat(this.superusers);
+    AuthorizedUsers = (this.participants && this.participants.concat(this.superusers || [])) ||
+                       this.superusers || [];
 
     return AuthorizedUsers.some(function(AuthorizedUser) {
         if (AuthorizedUser._id) {
@@ -197,7 +210,8 @@ RoomSchema.method('toJSON', function(user) {
         created: room.created,
         owner: room.owner,
         private: room.private,
-        hasPassword: this.hasPassword,
+        direct: room.direct,
+        directName: room.directName,
         participants: [],
         superusers: []
     };

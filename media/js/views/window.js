@@ -174,7 +174,8 @@
             });
         },
         onNewMessage: function(message) {
-            if (this.focus || message.historical || message.owner.id === this.client.user.id) {
+            if (this.focus || message.historical || message.owner.id === this.client.user.id
+            || (!message.room.direct && ($.inArray(message.room.id, this.client.user.attributes.alertedRooms) == -1))) {
                 return;
             }
             this.createDesktopNotification(message);
@@ -190,8 +191,8 @@
 
             var roomID = message.room.id,
                 avatar = message.owner.avatar,
-                icon = 'https://www.gravatar.com/avatar/' + avatar + '?s=50',
-                title = message.owner.displayName + ' in ' + message.room.name,
+                icon = '/extras/emotes/default/incoming_envelope.png',// + avatar + '?s=50',
+                title = message.owner.displayName + ' - ' + message.room.name,
                 mention = message.mentioned;
 
             var notification = notify.createNotification(title, {

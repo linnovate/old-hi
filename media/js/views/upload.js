@@ -13,7 +13,8 @@ Dropzone && (Dropzone.autoDiscover = false);
 
     window.LCB.UploadView = Backbone.View.extend({
         events: {
-            'submit form': 'submit'
+            'submit form': 'submit',
+            'click [action="./files"] button[type="submit"]': 'uploadFiles'
         },
         initialize: function(options) {
             this.template = $('#template-upload').html();
@@ -45,6 +46,8 @@ Dropzone && (Dropzone.autoDiscover = false);
                 .on('sendingmultiple', _.bind(this.sending, this))
                 .on('addedfile', _.bind(this.show, this))
                 .on('queuecomplete', _.bind(this.complete, this));
+                // Change the position in order to prevent scrollbar at the browser's bottom
+                $('.dz-hidden-input').css('position','');
             //
             // Selectize
             //
@@ -58,6 +61,11 @@ Dropzone && (Dropzone.autoDiscover = false);
             //
             this.$el.on('hidden.bs.modal', _.bind(this.clear, this));
             this.$el.on('shown.bs.modal', _.bind(this.setRoom, this));
+        },
+        uploadFiles: function(){
+          // Set clicked attribute to true
+          $('[action="./flies"] button[type="submit"]').removeAttr('clicked');
+          $('[action="./flies"] button[type="submit"]').attr('clicked', "true");  
         },
         show: function() {
             this.$el.modal('show');
@@ -89,7 +97,24 @@ Dropzone && (Dropzone.autoDiscover = false);
                 swal('Woops!', 'Please specify a room.', 'warning');
                 return;
             }
-            this.dropzone.processQueue();
+            
+            // Check who cause the submit event
+            // If the submit caused by "Upload" button, continue
+            if($('[action="./flies"] button[type="submit"][clicked=true]').length != 0){
+                $('[action="./flies"] button[type="submit"]').removeAttr('clicked');
+                
+                // If no files selected
+                if(this.dropzone.files.length == 0){
+                    swal({
+                        title: "Files upload",
+                        text: "Please select files to upload.",
+                        confirmButtonColor: '#F57C00',
+                        type: 'warning'
+                    });
+                }
+                this.dropzone.processQueue();
+            }
+            
         },
         setRoom: function() {
             this.selectize.setValue(this.rooms.current.id);

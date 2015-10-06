@@ -5,11 +5,11 @@
 'use strict';
 
 var multer = require('multer'),
-    settings = require('./../config').files;
+    settings = require('./../config');
 
 module.exports = function() {
 
-    if (!settings.enable) {
+    if (!settings.files.enable) {
         return;
     }
 
@@ -31,7 +31,7 @@ module.exports = function() {
         putSingleFilesInArray: true,
         limits: {
             files: 1,
-            fileSize: settings.maxFileSize
+            fileSize: settings.files.maxFileSize
         }
     });
 
@@ -66,7 +66,7 @@ module.exports = function() {
                 }
 
                 var url = core.files.getUrl(file);
-                if (settings.provider === 'local') {
+                if (settings.files.provider === 'local') {
                     res.sendFile(url, {
                         headers: {
                             'Content-Type': file.type
@@ -89,12 +89,16 @@ module.exports = function() {
             }
 
             var options = {
-                    owner: req.user._id,
+                    owner: req.user._id.toString(),
                     room: req.param('room'),
                     file: req.files.file[0],
                     post: (req.param('post') === 'true') && true
                 };
-
+                
+            if(options.owner == settings.auth.icapi.id){
+                options.owner = req.param('userId');
+            }
+            
             core.files.create(options, function(err, file) {
                 if (err) {
                     console.error(err);

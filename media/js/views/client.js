@@ -13,6 +13,8 @@
         el: '#lcb-client',
         events: {
             'click .lcb-tab': 'toggleSideBar',
+            'click #nav-button': 'toggleNavbar',
+            'click .hi-create-direct-message': 'newDirectMessage',
             'click .lcb-header-toggle': 'toggleSideBar'
         },
         initialize: function(options) {
@@ -85,10 +87,119 @@
             this.client.status.once('change:connected', _.bind(function(status, connected) {
                 this.$el.find('.lcb-client-loading').hide(connected);
             }, this));
+            
+            //
+            // Selectize
+            //
+            this.attachSelectize('.lcb-direct-user-name');
+            
+            this.client.createDirectMessage = this.createDirectMessage;
+            
             return this;
+        },
+        createDirectMessage: function(user){
+            var current_user = window.client.user;
+            
+            // Don't let user send a direct message to himself;
+            if(current_user.id == user.id){
+                return;
+            }
+            
+            // To check if I already created this room
+            var slug = user.id + current_user.id;
+            var opposite_slug = current_user.id + user.id;
+            
+            var room = window.client.rooms.findWhere({
+                slug: slug
+            });
+            
+            room = room || window.client.rooms.findWhere({
+                slug: opposite_slug
+            });
+            
+            // Room not created
+            if(!room){
+                var data = {
+                    name: window.client.user.get('displayName'),
+                    participants: [user.get('username'), current_user.get('username')],
+                    private: true,
+                    slug: slug,
+                    direct: true,
+                    directName: user.get('displayName')
+                };
+                
+                window.client.events.trigger('rooms:create', data);
+            }
+            else{
+                window.client.rooms.last.set('id',window.client.rooms.current.get('id'));
+                window.client.rooms.current.set('id',room.id);
+                window.client.router.navigate('!/room/'+room.id,{
+                    replace: true
+                });
+            }
+        },
+        toggleNavbar: function(e){
+            
         },
         toggleSideBar: function(e) {
             this.$el.toggleClass('lcb-sidebar-opened');
+        },
+        newDirectMessage: function(e){
+            $('.lcb-new-direct-message').addClass('hide');
+            $('.lcb-direct-user-name').removeClass('hide');
+            $('.lcb-direct-user-name input').focus();
+        },
+        clearDirectMessage: function(e){
+            $('.lcb-direct-user-name')[0].selectize.clear();
+        },
+        attachSelectize: function(textareaElement){
+            var that = this;
+            var all_users = that.client.getUsersSync();
+            
+            this.$(textareaElement).selectize({
+               delimiter: ',',
+               create: false,
+               render:{
+                   option: function(item, escape){
+                       return '<div class="user-item'>+
+                            '<img class="lcb-avatar user-icon" width="30" height="30" src="'+item.icon+'"></img>'+
+                            '<span class="lcb-room-sidebar-user-name">'+item.displayName+'</span>'+
+                            '<span class="lcb-room-sidebar-user-username">'+item.text+'</span>'+
+                            '</div>';
+                   }
+               },
+               onChange: function(val){
+                   if(val){
+                       var user = all_users.findWhere({username: val});
+                       if(!user || user.id == window.client.user.id){
+                           that.clearDirectMessage();
+                           return;
+                       }
+                       
+                       that.clearDirectMessage();
+                       $('#directMessageModal').closeModal();
+                       that.createDirectMessage(user);
+                   }
+               },
+               load: function(query, callback){
+                   if(!query.length) return callback();
+                   
+                   var users = _.filter(all_users.models, function(user){
+                      return user.get('username').indexOf(query) !== -1; 
+                   });
+                   
+                   users = _.map(users, function(user){
+                       return{
+                           value: user.get('username'),
+                           text: user.get('username'),
+                           icon: '/users/'+user.id+'/avatar',
+                           displayName: user.get('displayName')
+                       };
+                   });
+                   
+                   callback(users);
+               } 
+            }); 
         }
     });
 

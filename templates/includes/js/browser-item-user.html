@@ -1,5 +1,9 @@
 <script type="text/x-handlebars-template" id="template-room-browser-item-user">
-    <li class="lcb-rooms-list-user" data-id="{{id}}" title="{{displayName}}">
+    <div id="user" class="chip" data-id="{{id}}">
+        <img class="lcb-rooms-list-user-avatar" src="/users/{{username}}/avatar" alt="{{displayName}}"/>
+        {{displayName}}
+    </div>
+    <!--<li class="lcb-rooms-list-user" data-id="{{id}}" title="{{displayName}}">
         <img class="lcb-rooms-list-user-avatar" src="/users/{{username}}/avatar" alt="{{displayName}}" width="50" height="50" />
-    </li>
+    </li>-->
 </script>

@@ -1,7 +1,7 @@
 <script type="text/x-handlebars-template" id="template-room-browser-item">
     <li class="lcb-rooms-list-item" data-id="{{id}}">
         <div class="lcb-rooms-list-item-top">
-            {{#if hasPassword}}
+            {{#if private}}
                 <span class="lcb-rooms-list-item-password fa fa-lock"></span>
                 <a class="lcb-rooms-list-item-name" href="#!/room/{{id}}">{{name}}</a>
             {{else}}
@@ -11,10 +11,14 @@
         </div>
         <div class="lcb-rooms-list-item-description">{{description}}</div>
         <ul class="lcb-rooms-list-users"></ul>
+        {{#unless direct}}
         <div class="lcb-rooms-list-item-switch onoffswitch">
             <input type="checkbox" class="switch lcb-rooms-switch" id="room-switch-{{id}}" data-id="{{id}}" />
             <label class="switch lcb-rooms-switch-label" for="room-switch-{{id}}"></label>
         </div>
+        <div class="lcb-rooms-alert fa {{#if activeAlert}}fa-bell{{else}}fa-bell-slash{{/if}}" data-id="{{id}}">
+        </div>
+        {{/unless}}
         <div class="lcb-rooms-list-item-last-active">
             <i class="fa fa-clock-o"></i> <span class="value">{{lastActive}}</span>
         </div>

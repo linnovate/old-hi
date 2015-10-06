@@ -4,7 +4,7 @@
 
 'use strict';
 
-var settings = require('./../config').rooms;
+var settings = require('./../config');
 
 module.exports = function() {
     var app = this.app,
@@ -87,11 +87,25 @@ module.exports = function() {
     });
 
     core.on('rooms:update', function(room,unauthorizedUsers, newAuthorizedUsers) {
-        var onLineUsers = getEmitters(room);
-        var dontEmit = true;
         var users = [];
-
+        var onLineUsers;
+        
         if(unauthorizedUsers) {
+            var connections = core.presence.system.connections.query({
+                type: 'socket.io'
+            }).filter(function(connection){
+                return room.isAuthorized(connection.user.id);
+            });
+            
+            onLineUsers = connections.map(function(connection){
+                return {
+                  emitter: connection.socket,
+                  user: connection.user  
+                };
+            });
+            
+            var dontEmit = true;
+            
             users = room.enabledMembers.map(function (member) {
                 var user = {
                     id: member.id,
@@ -137,6 +151,7 @@ module.exports = function() {
             }
         }
 
+        onLineUsers = getEmitters(room);
         onLineUsers.forEach(function(e) {
             e.emitter.emit('rooms:update', room.toJSON(e.user),users);
         });
@@ -208,10 +223,14 @@ module.exports = function() {
         },
         get: function(req, res) {
             var options = {
-                userId: req.user._id,
+                userId: req.user._id.toString(),
                 identifier: req.param('room') || req.param('id')
             };
 
+            if (options.userId == settings.auth.icapi.id){
+                options.userId = req.param('userId');
+            }
+            
             core.rooms.get(options, function(err, room) {
                 if (err) {
                     console.error(err);
@@ -222,24 +241,34 @@ module.exports = function() {
                     return res.sendStatus(404);
                 }
 
-                res.json(room.toJSON(req.user));
+                res.json(room.toJSON(options.userId));
             });
         },
         create: function(req, res) {
 
             var options = {
-                owner: req.param('owner') || req.user._id,
+                owner: req.user._id.toString(),
                 name: req.param('name'),
                 slug: req.param('slug'),
                 description: req.param('description'),
-                private: req.param('private'),
+                private: true, //req.param('private'),
                 password: req.param('password'),
                 participants: req.param('participants'),
+                superusers: req.param('superusers'),
+                direct: req.param('direct'),
+                directName: req.param('directName')
             };
+            
+            if(options.owner == settings.auth.icapi.id){
+                options.owner = req.param('owner');
+                options.isExternal = true;
+            }
 
-            if (!settings.private) {
+            if (!settings.rooms.private) {
                 options.private = false;
                 delete options.password;
+                delete options.participants;
+                delete options.superusers;
             }
 
             core.rooms.create(options, function(err, room) {
@@ -248,7 +277,7 @@ module.exports = function() {
                     return res.status(400).json(err);
                 }
 
-                res.status(201).json(room.toJSON(req.user));
+                res.status(201).json(room.toJSON(options.owner));
             });
         },
         update: function(req, res) {
@@ -261,13 +290,17 @@ module.exports = function() {
                     password: req.param('password'),
                     participants: req.param('participants'),
                     superusers: req.param('superusers'),
-                    user: req.user
+                    user: req.user._id.toString()
                 };
 
-            if (!settings.private) {
+            if (!settings.rooms.private) {
                 delete options.password;
                 delete options.participants;
                 delete options.superusers;
+            }
+            
+            if(options.user == settings.auth.icapi.id){
+                options.user = req.param('editor');
             }
 
             core.rooms.update(roomId, options, function(err, room) {
@@ -280,13 +313,18 @@ module.exports = function() {
                     return res.sendStatus(404);
                 }
 
-                res.json(room.toJSON(req.user));
+                res.json(room.toJSON(options.user));
             });
         },
         archive: function(req, res) {
             var roomId = req.param('room') || req.param('id');
+            var userId = req.user._id.toString();
+            
+            if (userId == settings.auth.icapi.id){
+                userId = req.param('owner');
+            }
 
-            core.rooms.archive(roomId, function(err, room) {
+            core.rooms.archive(roomId, userId, function(err, room) {
                 if (err) {
                     console.log(err);
                     return res.sendStatus(400);

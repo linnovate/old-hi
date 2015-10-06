@@ -4,7 +4,8 @@ var Connection = require('./presence/connection'),
     Room = require('./presence/room'),
     ConnectionCollection = require('./presence/connection-collection'),
     RoomCollection = require('./presence/room-collection'),
-    UserCollection = require('./presence/user-collection');
+    UserCollection = require('./presence/user-collection'),
+    mongoose = require('mongoose');
 
 function PresenceManager(options) {
     this.core = options.core;
@@ -46,6 +47,22 @@ PresenceManager.prototype.disconnect = function(connection) {
     this.system.removeConnection(connection);
     this.core.emit('disconnect', connection);
     this.rooms.removeConnection(connection);
+    
+    // ADDED: By Avi I hope this is the right place
+    
+    (function(user_id){
+        var User = mongoose.model('User');
+        User.findById(user_id, function(err, user){
+            if(err){
+                //Oh noes, a bad thing happend!
+                console.log(err);
+                return;
+            }
+            
+            user.lastLogOut = Date.now();
+            user.save();
+        });
+    })(connection.user.id);
 };
 
 PresenceManager.prototype.join = function(connection, room,dontEmit) {

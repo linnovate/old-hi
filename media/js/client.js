@@ -66,7 +66,9 @@
             password: data.password,
             participants: data.participants,
             superusers: data.superusers,
-            private: data.private
+            private: data.private,
+            direct: data.direct || false,
+            directName: data.directName
         };
         var callback = data.callback;
         this.socket.emit('rooms:create', room, function(room) {
@@ -339,6 +341,31 @@
             room: id
         }, callback);
     };
+    // Turn on/off room's notifications
+    Client.prototype.turnNotifications = function(roomId){
+        if($.inArray(roomId, this.user.attributes.alertedRooms) > -1){
+            this.user.attributes.alertedRooms.splice(this.user.attributes.alertedRooms.indexOf(roomId),1);
+        }
+        else{
+            this.user.attributes.alertedRooms.push(roomId);
+        }
+        
+        var options = {
+            roomId: roomId
+        };
+        this.socket.emit('account:turnNotifications',options);
+    }
+    //
+    // Iframe
+    //
+    Client.prototype.iframeView = function(){
+        $('.lcb-sidebar').remove();
+        $('.lcb-header').remove();
+        $('.lcb-client').addClass('iframe');
+        $('#main-nav').remove();
+        store.set('sidebar', false);
+        this.options.iframe = true;
+    }
     //
     // Messages
     //
@@ -513,6 +540,7 @@
             routes: {
                 '!/room/': 'list',
                 '!/room/:id': 'join',
+                '!/room/:id/iframe': 'cut',
                 '*path': 'list'
             },
             join: function(id) {
@@ -520,6 +548,10 @@
             },
             list: function() {
                 that.switchRoom('list');
+            },
+            cut: function(id){
+                that.switchRoom(id);
+                that.iframeView();
             }
         });
         this.router = new Router();

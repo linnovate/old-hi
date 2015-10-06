@@ -11,7 +11,7 @@
 }
 .lcb-sidebar{
 	border-right: 0px;
-	background: linear-gradient(#0066CC, #00284D);
+	background: #3b3b3b;//linear-gradient(#0066CC, #00284D);
 	min-width: 217px;
 	box-shadow: -24px -1px 30px -28px #707070 inset;
 }
@@ -22,7 +22,7 @@
 
 .lcb-sidebar .dropdown{
 	min-height: 45px;
-	border-bottom: 1px solid #9bc256;
+	border-bottom: initial;;
 }
 
 .lcb-account-button.dropdown-toggle{
@@ -31,8 +31,38 @@
 	margin-top: 7px;
 }
 
+/******** User Sidebar Info **********/
+.lcb-account-button-avatar{
+	left: initial;
+	right: 5px;
+}
+
+.lcb-account-button-name, .lcb-account-button-username{
+	margin-left: 15px;
+	margin-right: 40px;
+}
+
+.lcb-account-button-chevron{
+	right: initial;
+	left: 10px;
+}
+
+.dropdown-menu-right{
+	left: 0;
+	right: auto;
+}
+
+/***************/
+.lcb-tab.lcb-tab-room{
+	background: rgba(230,230,230,0.2);
+	margin-bottom: 3px;
+}
+
+.lcb-tab.lcb-tab-room.selected{
+	background: rgba(230,230,230,0.4);
+}
+
 .lcb-tab.selected{
-	background: initial;
 	font-weight: bold;
 }
 
@@ -47,14 +77,22 @@
 
 .lcb-tabs{
 	border: 0px;
+	overflow: hidden;
 }
 
 .lcb-tab{
 	border: 0px;
 }
 
+.lcb-tabs-outer{
+	padding-right: 0;
+	position: absolute;
+	height: 100%;
+	width: 100%;
+}
+
 .lcb-tab a{
-	color: #cbf2a3;
+	color: white;
 	border: 0px;
 }
 
@@ -71,12 +109,102 @@
 	border-radius: 12px;
 }
 
-.lcb-tab-external{
-	margin-right: 10px;
+.lcb-tab-separator{
 	color: white;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+	
+	.title{
+		width: 100%;
+		background: aliceblue;
+		text-align: center;
+	}
 }
 
-.lcb-tab-internal{
-	margin-right: 10px;
-	color: white;
+.fa-chevron-left:before{
+	position: absolute;
+	top: 0;
+	margin: 5px;
+	left: -12px;
+}
+
+.option{
+	background: white;
+}
+
+.option.active{
+	background: aliceblue;
+}
+
+/************* Create direct message **************/
+.lcb-create-direct-message{
+	width: 100%;
+	margin: 3px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	cursor: pointer;
+	
+	.lcb-new-direct-message{
+		cursor: pointer;
+	}
+	.lcb-direct-user-name{
+		background: none;
+		border: none;
+		margin-left: 10px;
+		width: 80%;
+		float: left;
+	}
+	.selectize-dropdown-content{
+		height: 10vh;
+		padding: 0;
+	}
+}
+/*********** Sidebar tabs **************/
+.lcb-internal-group{
+	height: 30vh;
+}
+
+.lcb-external-group{
+	height: 30vh;
+}
+
+.lcb-direct-messages{
+	height: 30vh;
+}
+
+.lcb-sidebar{
+	.lcb-tabs{
+		ul{
+			height: 28vh;
+		}
+	}
+}
+
+.lcb-sidebar-tab-title{
+	width: 100%;
+	background: aliceblue;
+	text-align: center;
+	margin: 0;
+	height: 2vh;
+}
+
+.lcb-tab-separator.lcb-tab.lcb-tab-home{
+	height: 3vh;
+	overflow: hidden;
+}
+
+/*********** Selectize Search User **********/
+.user-item{
+	background: white;
+	
+	.user-icon{
+		float: left;
+	}
+}
+
+.user-item:hover{
+	background: aliceblue;
 }

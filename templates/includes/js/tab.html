@@ -1,12 +1,22 @@
 <script type="text/x-handlebars-template" id="template-room-tab">
     <li class="lcb-tab lcb-tab-room" data-id="{{id}}">
         <a href="#!/room/{{id}}">
-            <span class="lcb-tab-title">{{name}}</span>
+            {{#if directName}}
+                {{#if iAmOwner}}
+                    <span class="lcb-tab-title">{{directName}}</span>
+                {{else}}
+                    <span class="lcb-tab-title">{{name}}</span>
+                {{/if}}
+            {{else}}
+                <span class="lcb-tab-title">{{name}}</span>
+            {{/if}}
             <span class="lcb-tab-alerts">
                 <span class="lcb-tab-alerts-mentions"></span>
                 <span class="lcb-tab-alerts-total"></span>
             </span>
-            <span class="lcb-tab-close">&times;</span>
+            {{#unless direct}}
+                <span class="lcb-tab-close">&times;</span>
+            {{/unless}}
         </a>
     </li>
 </script>

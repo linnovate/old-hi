@@ -51,7 +51,7 @@ module.exports = function() {
         req.io.route('account:login');
     });
 
-    app.post('/account/register', function(req) {
+    app.post('/account/register', middlewares.requireLogin, function(req) {
         req.io.route('account:register');
     });
 
@@ -80,7 +80,7 @@ module.exports = function() {
     //
     app.io.route('account', {
         whoami: function(req, res) {
-            res.json(req.user);
+            res.json(req.user.toJSON(true));
         },
         profile: function(req, res) {
             var form = req.body || req.data,
@@ -156,6 +156,26 @@ module.exports = function() {
                 });
             });
         },
+        turnNotifications: function(req, res){
+          var data = {
+              roomId: req.param('roomId')
+          };
+          core.account.update(req.user._id, data, function(err,user){
+              if(err){
+                  return res.json({
+                      status: 'error',
+                      message: 'Unable to turn notifications.',
+                      errors: err
+                  });
+              }
+              
+              if(!user){
+                  return res.sendStatus(404);
+              }
+              
+              res.json(user);
+          });
+        },
         generate_token: function(req, res) {
             if (req.user.usingToken) {
                 return res.status(403).json({
@@ -206,10 +226,10 @@ module.exports = function() {
             });
         },
         register: function(req, res) {
-
-            if (req.user ||
+            if((!(req.user && req.user._id.toString() == settings.auth.icapi.id)) &&
+               (req.user ||
                 !auth.providers.local ||
-                !auth.providers.local.enableRegistration) {
+                !auth.providers.local.enableRegistration)) {
 
                 return res.status(403).json({
                     status: 'error',
@@ -219,25 +239,17 @@ module.exports = function() {
 
             var fields = req.body || req.data;
 
-            // Sanity check the password
-            var passwordConfirm = fields.passwordConfirm || fields.passwordconfirm || fields['password-confirm'];
-
-            if (fields.password !== passwordConfirm) {
-                return res.status(400).json({
-                    status: 'error',
-                    message: 'Password not confirmed'
-                });
-            }
-
             var data = {
                 provider: 'local',
                 username: fields.username,
-                email: fields.email,
-                password: fields.password,
                 firstName: fields.firstName || fields.firstname || fields['first-name'],
                 lastName: fields.lastName || fields.lastname || fields['last-name'],
                 displayName: fields.displayName || fields.displayname || fields['display-name']
             };
+            
+            if(fields.email){
+                data.email = fields.email;
+            }
 
             core.account.create('local', data, function(err) {
                 if (err) {

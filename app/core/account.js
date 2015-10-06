@@ -47,12 +47,25 @@ AccountManager.prototype.update = function(id, options, cb) {
             });
 
             if (xmppConns.length) {
+                console.log('exiting update by xmpp');
                 return cb(null, null, 'You can not change your username ' +
                           'with active XMPP sessions.');
             }
 
             usernameChange = true;
             user.username = options.username;
+        }
+        
+        if(options.roomId){
+            var index;
+            
+            index = user.alertedRooms.indexOf(options.roomId);
+            
+            if(index !== -1){
+                user.alertedRooms.push(options.roomId);
+            }else{
+                user.alertedRooms.splice(index, 1);
+            }
         }
 
         if (user.local) {
@@ -67,11 +80,13 @@ AccountManager.prototype.update = function(id, options, cb) {
             if (err) {
                 return cb(err);
             }
-
-            this.core.emit('account:update', {
-                usernameChanged: usernameChange,
-                user: user.toJSON()
-            });
+            
+            if(!options.roomId){
+                this.core.emit('account:update', {
+                    usernameChanged: usernameChange,
+                    user: user.toJSON()
+                });
+            }
 
             if (cb) {
                 cb(null, user);

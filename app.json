@@ -1,11 +1,10 @@
 {
-    "name": "Let's Chat",
+    "name": "HI",
     "description": "Self-hosted chat app for small teams",
     "repository": "https://github.com/sdelements/lets-chat",
     "logo": "http://i.imgur.com/eXTLHNN.png",
     "keywords": [
-        "lets",
-        "chat",
+        "hi",
         "xmpp"
     ],
     "addons": [

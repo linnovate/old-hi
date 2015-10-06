@@ -10,7 +10,7 @@ function AvatarProvider(options) {
 
 AvatarProvider.prototype.fetch = function(user, query, cb) {
 
-    var colors = colorHash.rgb(user.email || user.id);
+    var colors = colorHash.rgb(user.firstName || user.lastName);
 
     var svg =
         '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' +
@@ -26,6 +26,6 @@ AvatarProvider.prototype.fetch = function(user, query, cb) {
         raw: svg
     });
 
-}
+};
 
 module.exports = AvatarProvider;

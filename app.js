@@ -1,10 +1,10 @@
 //
-// Let's Chat
+// Let's Chat => HI
 //
 
 'use strict';
 
-process.title = 'letschat';
+process.title = 'hi';
 
 require('colors');
 
@@ -78,7 +78,7 @@ app.io.session(session);
 auth.setup(app, session, core);
 
 // Security protections
-app.use(helmet.frameguard());
+//app.use(helmet.frameguard());
 app.use(helmet.hidePoweredBy());
 app.use(helmet.ieNoOpen());
 app.use(helmet.noSniff());
@@ -105,6 +105,7 @@ app.use(require('connect-assets')({
     paths: [
         'media/js',
         'media/less',
+        'customization/img',
         'customization/less',
         'customization/js'
     ],
@@ -230,6 +231,7 @@ function startApp() {
         xmpp(core);
     }
 
+    // TODO : Change let's chat logo here
     var art = fs.readFileSync('./app/misc/art.txt', 'utf8');
     console.log('\n' + art + '\n\n' + 'Release ' + psjon.version.yellow + '\n');
 }

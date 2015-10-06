@@ -80,5 +80,14 @@
 	"Room": "חדר",
 	"Upload Files": "העלה קבצים",
 	"Files": "קבצים",
-	"Superusers": "Superusers"
+	"Superusers": "Superusers",
+	"From Israel with Love": "From Israel with Love",
+	"All Groups": "All Groups",
+	"Groups": "Groups",
+	"External Groups": "External Groups",
+	"Direct Messages": "Direct Messages",
+	"New Direct Message": "New Direct Message",
+	"New Group": "New Group",
+	"Please select a user to start a direct message.": "Please select a user to start a direct message.",
+	"Start typing for autocomplete": "Start typing for autocomplete"
 }

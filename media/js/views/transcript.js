@@ -66,7 +66,7 @@
                     ranges: ranges
                 }, setRange);
 
-            this.$query.jvFloat();
+            //this.$query.jvFloat();
 
         },
         search: _.throttle(function() {
@@ -85,6 +85,9 @@
                 reverse: false,
                 take: 5000
             }, function(messages) {
+                if(message.length === 0){
+                    messages.push({owner:{id:"0"}});
+                }
                 _.each(messages, function(message) {
                     that.addMessage(message);
                 });
@@ -112,7 +115,12 @@
             $text.html(this.formatMessage($text.html()));
 
             this.formatTimestamp($html.find('time'));
-            this.$messages.append($html);
+            if(message.owner.id === "0"){
+                this.$messages.append('<p class="no-messages-found">No messages found</p>');
+            }
+            else{
+                this.$messages.append($html);
+            }
             this.lastMessageOwner = message.owner.id;
             this.lastMessagePosted = posted;
         },

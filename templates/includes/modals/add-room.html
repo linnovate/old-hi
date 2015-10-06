@@ -4,56 +4,66 @@
             <form role="form" action="#!/rooms/add" class="lcb-rooms-add">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title"><$ __('Add Room') $></h4>
+                    <h4 class="modal-title">
+                        <$ __('Add Room') $>
+                    </h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="lcb-room-name"><$ __('Name') $></label>
-                        <input type="text" placeholder="<$ __('Name') $>"
-                            class="lcb-room-name form-control" >
+                    <div class="form-group row">
+                        <div class="input-field col s12">
+                            <input id="lcb-room-name" type="text" maxlength="70" class="lcb-room-name validate form-control" >
+                            <label for="lcb-room-name">
+                                <$ __('Name') $>
+                            </label> 
+                        </div>
                     </div>
 
-                    <div class="form-group">
+                    <!--<div class="form-group">
                         <label><$ __('Slug') $></label>
                         <div class="input-group">
                             <span class="input-group-addon">#</span>
                             <input type="text" placeholder="<$ __('Slug') $>"
                                 class="lcb-room-slug form-control" >
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label><$ __('Description') $></label>
-                        <input type="text" placeholder="<$ __('Description') $>"
-                            class="lcb-room-description form-control">
+                    </div>-->
+                    <div class="form-group row">
+                        <div class="input-field col s12">
+                            <input id="lcb-room-description" type="text" maxlength="70"
+                                class="lcb-room-description form-control">
+                            <label for="lcb-room-description">
+                                <$ __('Description') $>
+                            </label>
+                        </div>
                     </div>
                     <% if settings.rooms.private %>
                         <div class="checkbox">
-                            <label>
+                            <!--<label>
                                 <input type="checkbox" class="lcb-room-private" />
                                 <$ __('Private?') $>
-                            </label>
-                            <input type="text"
-                                    placeholder="<$ __('Participants') $>"
-                                    class="lcb-new-room-participants form-control">
+                            </label> Prevent public room-->
+                            <textarea placeholder="<$ __('Participants') $>" class="lcb-new-room-participants form-control"></textarea>
+                            <textarea placeholder="<$ __('Superusers') $>" class="lcb-new-room-superusers form-control"></textarea>
                         </div>
-                        <div class="row">
-                            <div class="form-group col-sm-9">
-                                <label><$ __('Password') $></label>
-                                <input type="password"
-                                    placeholder="<$ __('Empty for public room') $>"
-                                    class="lcb-room-password form-control">
+                        <% if settings.rooms.passwordProtected %>
+                            <div class="row">
+                                <div class="form-group col-sm-9">
+                                    <label><$ __('Password') $></label>
+                                    <input type="password"
+                                        placeholder="<$ __('Empty for public room') $>"
+                                        class="lcb-room-password form-control">
+                                </div>
+                                <div class="form-group col-sm-9">
+                                    <label><$ __('Confirm Password') $></label>
+                                    <input type="password"
+                                        class="lcb-room-confirm-password form-control">
+                                </div>
                             </div>
-                            <div class="form-group col-sm-9">
-                                <label><$ __('Confirm Password') $></label>
-                                <input type="password"
-                                    class="lcb-room-confirm-password form-control">
-                            </div>
-                        </div>
+                        <% endif %>
                     <% endif %>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal"><$ __('Cancel') $></button>
-                    <button type="submit" class="btn btn-primary"><$ __('Save') $></button>
+                    <button type="button" class="btn btn-default theme blue darken-3" data-dismiss="modal"><$ __('Cancel') $></button>
+                    <button type="submit" class="btn btn-primary theme blue darken-3"><$ __('Save') $></button>
                 </div>
             </form>
         </div><!-- /.modal-content -->

@@ -23,7 +23,7 @@ function AvatarManager(options) {
         return {
             key: key,
             provider: new Provider(settings[key])
-        }
+        };
 
     });
 
@@ -31,7 +31,7 @@ function AvatarManager(options) {
 
 AvatarManager.prototype.add = function(query, cb) {
 
-}
+};
 
 AvatarManager.prototype.fetch = function(query, cb) {
 
