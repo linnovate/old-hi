@@ -34,6 +34,7 @@
             this.model.set('iCanEdit', iCanEdit);
             this.model.set('inIframe', this.client.options.iframe);
             
+            
             this.template = options.template;
             this.messageTemplate =
                 Handlebars.compile($('#template-message').html());
@@ -370,7 +371,7 @@
                     text: "You will not be able to open it!",
                     type: "error",
                     confirmButtonText: "Archive",
-                    allowOutsideClick: true,
+                    allowOutsideClick: false,
                     confirmButtonColor: "#D32F2F",
                     showCancelButton: true,
                     closeOnConfirm: true,

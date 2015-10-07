@@ -23,7 +23,7 @@ var getUsersModel = function(room, authorizedUsers, cb) {
             });
     }
 
-    users = _.chain(authorizedUsers)
+    users = _.chain(users)
         .map(function(username) {
             return username && username.replace(/@,\s/g, '').trim();
         })
@@ -207,7 +207,7 @@ RoomManager.prototype.create = function(options, cb) {
                 
                 // Prevent duplicate of roles to the same user changed by jo
                 superusers = cleanSuperusers(superusers, options.owner);
-                participants = cleanSuperusers(participants, superusers, options.owner);
+                participants = cleanParticipants(participants, superusers, options.owner);
                 
                 // Get changed permission data in order to update room's enabled members
                 // and room's connected users changed by jo

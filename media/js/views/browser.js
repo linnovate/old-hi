@@ -91,7 +91,7 @@
           }
           
           // Change the status of room's notification in db
-          this.client.turnNotification(id);
+          this.client.turnNotifications(id);
         },
         add: function(room) {
             var room = room.toJSON ? room.toJSON() : room,
@@ -201,10 +201,10 @@
           swal({
              title: 'Discard changes ?',
              text:'Changes won\'t be saved!',
-             confirmButton: 'Discard',
+             confirmButtonText: 'Discard',
              allowOutsideClick: false,
              type: 'warning',
-             confirmButtomColor: '#F57C00',
+             confirmButtonColor: '#F57C00',
              showCancelButton: true,
              closeOnConfirm: true,
           }, function(isConfirm){
@@ -229,7 +229,7 @@
                 $password = this.$('.lcb-room-password'),
                 $confirmPassword = this.$('.lcb-room-confirm-password'),
                 $participants = this.$('.lcb-new-room-participants'),
-                $superusers = this.$('lcb-new-room-superusers'),
+                $superusers = this.$('.lcb-new-room-superusers'),
                 //$private = this.$('.lcb-room-private'), prevent public room
                 data = {
                     name: $name.val().trim(),
@@ -317,7 +317,7 @@
                 .find('#user.chip[data-id="' + user.id + '"]').remove();
                 
             var room_users = 
-                this.$('lcb-rooms-list-item[data-id="'+room.id+'"]')
+                this.$('.lcb-rooms-list-item[data-id="'+room.id+'"]')
                     .find('.lcb-rooms-list-users');
             var current_users = room_users.find('#user.chip').length;
             var room_users_all = room_users.find('#'+room.id);

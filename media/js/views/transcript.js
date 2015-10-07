@@ -85,7 +85,7 @@
                 reverse: false,
                 take: 5000
             }, function(messages) {
-                if(message.length === 0){
+                if(messages.length === 0){
                     messages.push({owner:{id:"0"}});
                 }
                 _.each(messages, function(message) {

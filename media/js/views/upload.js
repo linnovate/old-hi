@@ -64,8 +64,8 @@ Dropzone && (Dropzone.autoDiscover = false);
         },
         uploadFiles: function(){
           // Set clicked attribute to true
-          $('[action="./flies"] button[type="submit"]').removeAttr('clicked');
-          $('[action="./flies"] button[type="submit"]').attr('clicked', "true");  
+          $('[action="./files"] button[type="submit"]').removeAttr('clicked');
+          $('[action="./files"] button[type="submit"]').attr('clicked', "true");  
         },
         show: function() {
             this.$el.modal('show');
@@ -100,8 +100,8 @@ Dropzone && (Dropzone.autoDiscover = false);
             
             // Check who cause the submit event
             // If the submit caused by "Upload" button, continue
-            if($('[action="./flies"] button[type="submit"][clicked=true]').length != 0){
-                $('[action="./flies"] button[type="submit"]').removeAttr('clicked');
+            if($('[action="./files"] button[type="submit"][clicked=true]').length != 0){
+                $('[action="./files"] button[type="submit"]').removeAttr('clicked');
                 
                 // If no files selected
                 if(this.dropzone.files.length == 0){
