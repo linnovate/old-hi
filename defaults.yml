@@ -2,12 +2,12 @@
 # Let's Chat Built-in Defaults
 #
 
-env: development # development / production
+env: production # development / production
 
 http:
   enable: true
-  host:
-  port: 5000
+  host: localhost
+  port: 80
 
 https:
   enable: false
@@ -40,7 +40,7 @@ files:
   enable: true
   provider: local
   maxFileSize: 100000000
-  restrictTypes: true
+  restrictTypes: false
   allowedTypes:
     - 'image/jpeg'
     - 'image/png'
@@ -50,12 +50,14 @@ files:
 
 auth:
   throttling:
-    enable: true
+    enable: false
     threshold: 3
   providers: [local] # [local, kerberos, ldap] - You can specify the order
   local:
     enableRegistration: true
     passwordRegex: ^.{8,64}$
+  icapi:
+    id: "no-id"
 
 private:
   enable: true
@@ -66,7 +68,7 @@ noRobots: true # Serve robots.txt with disallow
 
 rooms:
   private: true
-  passwordProtected: true
+  passwordProtected: false
 
 i18n:
   locale: he

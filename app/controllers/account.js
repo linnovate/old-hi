@@ -51,7 +51,7 @@ module.exports = function() {
         req.io.route('account:login');
     });
 
-    app.post('/account/register', middlewares.requireLogin, function(req) {
+    app.post('/account/register', function(req) {
         req.io.route('account:register');
     });
 
@@ -226,10 +226,9 @@ module.exports = function() {
             });
         },
         register: function(req, res) {
-            if((!(req.user && req.user._id.toString() == settings.auth.icapi.id)) &&
-               (req.user ||
+            if(req.user ||
                 !auth.providers.local ||
-                !auth.providers.local.enableRegistration)) {
+                !auth.providers.local.enableRegistration) {
 
                 return res.status(403).json({
                     status: 'error',
@@ -239,10 +238,21 @@ module.exports = function() {
 
             var fields = req.body || req.data;
 
+            // Sanity check password   
+            var passwordConfirm = fields.passwordConfirm || fields.passwordconfirm || fields['password-confirm'];
+            
+            if(fields.password !== passwordConfirm){
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'Password not confirmed'
+                });
+            }
+
             var data = {
                 provider: 'local',
                 username: fields.username,
                 firstName: fields.firstName || fields.firstname || fields['first-name'],
+                password: fields.password,
                 lastName: fields.lastName || fields.lastname || fields['last-name'],
                 displayName: fields.displayName || fields.displayname || fields['display-name']
             };

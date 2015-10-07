@@ -161,7 +161,7 @@
                create: false,
                render:{
                    option: function(item, escape){
-                       return '<div class="user-item'>+
+                       return '<div class="user-item">'+
                             '<img class="lcb-avatar user-icon" width="30" height="30" src="'+item.icon+'"></img>'+
                             '<span class="lcb-room-sidebar-user-name">'+item.displayName+'</span>'+
                             '<span class="lcb-room-sidebar-user-username">'+item.text+'</span>'+
