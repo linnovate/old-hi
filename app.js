@@ -105,7 +105,6 @@ app.use(require('connect-assets')({
     paths: [
         'media/js',
         'media/less',
-        'customization/img',
         'customization/less',
         'customization/js'
     ],
