@@ -7,7 +7,7 @@ env: production # development / production
 http:
   enable: true
   host: localhost
-  port: 80
+  port: 5000
 
 https:
   enable: false

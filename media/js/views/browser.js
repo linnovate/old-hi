@@ -38,9 +38,9 @@
             }, this);
 
             this.attachSelectize('.lcb-new-room-participants');
-            
+
             this.attachSelectize('.lcb-new-room-superusers');
-            
+
             $('.modal-trigger').leanModal();
         },
         updateToggles: function(room, joined) {
@@ -50,7 +50,7 @@
           if(!e.currentTarget.checked){
               $('.lcb-new-room-superusers').addClass('hide');
               $('.lcb-new-room-participants').addClass('hide');
-          }  
+          }
           else{
               $('.lcb-new-room-superusers').removeClass('hide');
               $('.lcb-new-room-participants').removeClass('hide');
@@ -75,12 +75,12 @@
         },
         turnAlert: function(e){
           var $noteIcon = $(e.currentTarget),
-              id = $noteIcon.data('id');  
-              
+              id = $noteIcon.data('id');
+
           if (!this.rooms.get(id)){
               return;
           }
-          
+
           if($noteIcon.hasClass('fa-bell-slash')){
               $noteIcon.removeClass('fa-bell-slash');
               $noteIcon.addClass('fa-bell');
@@ -89,7 +89,7 @@
               $noteIcon.removeClass('fa-bell');
               $noteIcon.addClass('fa-bell-slash');
           }
-          
+
           // Change the status of room's notification in db
           this.client.turnNotifications(id);
         },
@@ -104,7 +104,7 @@
             }
             else if(context.direct){
                 //this.$('.lcb-rooms-list-direct').append(this.template(context));
-                // Do nothing   
+                // Do nothing
             }
             else
             {
@@ -167,37 +167,33 @@
         },
         attachSelectize: function(textareaElement){
           var that = this;
-          
+
           this.$(textareaElement).selectize({
              delimiter: ',',
              create: false,
              load: function(query, callback){
                  if(!query.length) return callback();
-                 
-                 var users = that.client.getUsersSync();
-                 
-                 var usernames = users.map(function(user){
-                     return user.attributes.username;
+
+                 var allUsers = that.client.getUsersSync();
+
+                 var wantedUsers = allUsers.filter(function (user) {
+                    return user.attributes.username.indexOf(query) !== -1;
                  });
-                 
-                 usernames = _.filter(usernames, function(username){
-                     return username.indexOf(query) !== -1;
-                 });
-                 
-                 users = _.map(usernames, function(username){
+
+                 wantedUsers = _.map(wantedUsers, function(user){
                      return {
-                         value: username,
-                         text: username
+                         value: user.attributes.id,
+                         text: user.attributes.username
                      };
                  });
-                 
-                 callback(users);
-             } 
+
+                 callback(wantedUsers);
+             }
           });
         },
         cancelRoomCreation: function(e){
           var $form = $(e.target.form);
-          
+
           swal({
              title: 'Discard changes ?',
              text:'Changes won\'t be saved!',
@@ -206,7 +202,7 @@
              type: 'warning',
              confirmButtonColor: '#F57C00',
              showCancelButton: true,
-             closeOnConfirm: true,
+             closeOnConfirm: true
           }, function(isConfirm){
             if(isConfirm){
                 $form.trigger('reset');
@@ -216,7 +212,7 @@
             else {
                 $('#lcb-add-room').modal('show');
             }
-          }); 
+          });
         },
         create: function(e) {
             var that = this;
@@ -248,9 +244,13 @@
             // Check if the room is private
             if(data.private){
 
-                data.participants = $participants.val();
-                
-                data.superusers = $superusers.val();
+                data.participants = _.map($participants[1].getElementsByClassName("item"), function(item) {
+                    return item.getAttribute("data-value");
+                });
+
+                data.superusers = _.map($superusers[1].getElementsByClassName("item"), function(item) {
+                    return item.getAttribute("data-value");
+                });
             }
 
             $name.parent().removeClass('has-error');
@@ -263,7 +263,7 @@
                 swal('Room creation', 'Room name can not be empty');
                 return;
             }
-            
+
             data.slug = Date.now().toString();
             // TODO : we require slug is non-empty
             if (!data.slug) {
@@ -295,8 +295,8 @@
             var room_users =
                 this.$('.lcb-rooms-list-item[data-id="' + room.id + '"]')
                     .find('.lcb-rooms-list-users');
-                    
-            // Get 
+
+            // Get
             var current_users = room_users.find('#user.chip').length;
             if(current_users < 4){
                 room_users.prepend(this.userTemplate(user.toJSON()));
@@ -315,13 +315,13 @@
         removeUser: function(user, room) {
             this.$('.lcb-rooms-list-item[data-id="' + room.id + '"]')
                 .find('#user.chip[data-id="' + user.id + '"]').remove();
-                
-            var room_users = 
+
+            var room_users =
                 this.$('.lcb-rooms-list-item[data-id="'+room.id+'"]')
                     .find('.lcb-rooms-list-users');
             var current_users = room_users.find('#user.chip').length;
             var room_users_all = room_users.find('#'+room.id);
-            
+
             var num = parseInt(room_users_all.text()) || 0;
             if(num -1 <= 0){
                 room_users_all.text('');
