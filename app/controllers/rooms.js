@@ -300,7 +300,7 @@ module.exports = function() {
             }
 
             if(options.user == settings.auth.icapi.id){
-                options.user = req.param('editor');
+                options.user = req.param('owner');
             }
 
             core.rooms.update(roomId, options, function(err, room) {

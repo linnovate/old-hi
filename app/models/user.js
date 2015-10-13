@@ -89,6 +89,10 @@ var UserSchema = new mongoose.Schema({
     lastLogOut: {
         type: Date
     },
+    avatar:{
+        type: String,
+        required: false
+    },
     rooms: [{
 		type: ObjectId,
 		ref: 'Room'
@@ -114,9 +118,9 @@ UserSchema.virtual('local').get(function() {
     return this.provider === 'local';
 });
 
-UserSchema.virtual('avatar').get(function() {
+/*UserSchema.virtual('avatar').get(function() {
     return md5(this.email);
-});
+});*/
 
 UserSchema.pre('save', function(next) {
     var user = this;
@@ -124,13 +128,13 @@ UserSchema.pre('save', function(next) {
         return next();
     }
 
-    bcrypt.hash(user.password, 10, function(err, hash) {
+    /*bcrypt.hash(user.password, 10, function(err, hash) { changed by jo in order to prevent password requirement
         if (err) {
             return next(err);
         }
         user.password = hash;
         next();
-    });
+    });*/
 });
 
 UserSchema.statics.findByIdentifier = function(identifier, cb) {
@@ -280,11 +284,11 @@ UserSchema.method('toJSON', function(getAlertedRooms) {
         displayName: this.displayName,
         avatar: this.avatar
     };
-    
+
     if(getAlertedRooms){
         userData.alertedRooms = this.alertedRooms;
     }
-    
+
     return userData;
 });
 
