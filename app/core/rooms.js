@@ -40,7 +40,7 @@ var cleanParticipants = function(participants, superusers, owner){
     var justParticipants =[];
 
     for (var i = 0; i < participants.length; i++){
-        if (!(owner == participants[i]._id)){
+        if (!(owner.toString() == participants[i]._id.toString())){
 
             var isSuperuser = false;
             for (var j = 0; j < superusers.length && !isSuperuser; j++){
@@ -63,7 +63,7 @@ var cleanSuperusers = function(superusers, owner){
     var justSuperusers =[];
 
     for (var i = 0; i < superusers.length; i++){
-        if (!(owner == superusers[i]._id)){
+        if (!(owner.toString() == superusers[i]._id.toString())){
             justSuperusers.push(superusers[i]);
         }
     }
