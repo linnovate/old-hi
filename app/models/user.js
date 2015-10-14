@@ -35,6 +35,7 @@ var UserSchema = new mongoose.Schema({
         trim: true,
         lowercase: true,
         unique: true,
+        sparse: true,
         validate: [ validate.email, 'invalid email address' ]
     },
     password: {
@@ -91,7 +92,8 @@ var UserSchema = new mongoose.Schema({
     },
     avatar:{
         type: String,
-        required: false
+        required: false,
+        trim:true
     },
     rooms: [{
 		type: ObjectId,
@@ -127,14 +129,18 @@ UserSchema.pre('save', function(next) {
     if (!user.isModified('password')) {
         return next();
     }
-
-    /*bcrypt.hash(user.password, 10, function(err, hash) { changed by jo in order to prevent password requirement
-        if (err) {
-            return next(err);
-        }
-        user.password = hash;
+    if (user.password != undefined) { //changed by jo in order to prevent password requirement
+        bcrypt.hash(user.password, 10, function (err, hash) {
+            if (err) {
+                return next(err);
+            }
+            user.password = hash;
+            next();
+        });
+    }
+    else {
         next();
-    });*/
+    }
 });
 
 UserSchema.statics.findByIdentifier = function(identifier, cb) {

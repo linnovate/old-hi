@@ -252,7 +252,7 @@ module.exports = function() {
                 provider: 'local',
                 username: fields.username,
                 firstName: fields.firstName || fields.firstname || fields['first-name'],
-                //password: fields.password, changed by jo
+                password: fields.password,
                 lastName: fields.lastName || fields.lastname || fields['last-name'],
                 displayName: fields.displayName || fields.displayname || fields['display-name'],
                 avatar: fields.avatar || fields['avatar']
