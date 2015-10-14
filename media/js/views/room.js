@@ -27,14 +27,17 @@
         initialize: function(options) {
             this.client = options.client;
 
+            var roomSuperusers = this.model.get('superusers').map(function(user){
+               return user.id;
+            });
             var iAmOwner = this.model.get('owner') === this.client.user.id;
-            var iCanEdit = iAmOwner || ($.inArray(this.client.user.get('username'),this.model.get('superusers'))!== -1);
+            var iCanEdit = iAmOwner || ($.inArray(this.client.user.get('id'),roomSuperusers)!== -1);
 
             this.model.set('iAmOwner', iAmOwner);
             this.model.set('iCanEdit', iCanEdit);
             this.model.set('inIframe', this.client.options.iframe);
-            
-            
+
+
             this.template = options.template;
             this.messageTemplate =
                 Handlebars.compile($('#template-message').html());
@@ -68,7 +71,7 @@
             this.atwhoAllMentions();
             this.atwhoRooms();
             this.atwhoEmotes();
-            
+
             this.attachSelectize('.lcb-entry-participants');
             this.attachSelectize('.lcb-entry-superusers');
         },
@@ -188,24 +191,20 @@
                 load: function(query, callback) {
                     if (!query.length) return callback();
 
-                    var users = that.client.getUsersSync();
+                    var allUsers = that.client.getUsersSync();
 
-                    var usernames = users.map(function(user) {
-                        return user.attributes.username;
+                    var wantedUsers = allUsers.filter(function (user) {
+                        return user.attributes.username.indexOf(query) !== -1;
                     });
 
-                    usernames = _.filter(usernames, function(username) {
-                        return username.indexOf(query) !== -1;
-                    });
-
-                    users = _.map(usernames, function(username) {
+                    wantedUsers = _.map(wantedUsers, function(user){
                         return {
-                            value: username,
-                            text: username
+                            value: user.attributes.id,
+                            text: user.attributes.username
                         };
                     });
 
-                    callback(users);
+                    callback(wantedUsers);
                 }
             });
         },
@@ -296,21 +295,25 @@
                 var superusers = this.model.get('superusers');
                 var participantsOptions = [];
                 var superusersOptions = [];
+                var participantsItems = [];
+                var superusersItems = [];
 
                 for (var i = 0; i < participants.length; i++) {
-                    participantsOptions.push({text: participants[i], value: participants[i]});
+                    participantsOptions.push({text: participants[i].username, value: participants[i].id});
+                    participantsItems.push(participants[i].id);
                 }
 
                 for (var j = 0; j < superusers.length; j++) {
-                    superusersOptions.push({text: superusers[j], value: superusers[j]});
+                    superusersOptions.push({text: superusers[j].username, value: superusers[j].id});
+                    superusersItems.push(superusers[j].id);
                 }
 
                 $participantsTextarea[0].selectize.clear();
                 $superusersTextarea[0].selectize.clear();
                 $participantsTextarea[0].selectize.addOption(participantsOptions);
                 $superusersTextarea[0].selectize.addOption(superusersOptions);
-                $participantsTextarea[0].selectize.addItems(participants);
-                $superusersTextarea[0].selectize.addItems(superusers);
+                $participantsTextarea[0].selectize.addItems(participantsItems);
+                $superusersTextarea[0].selectize.addItems(superusersItems);
             }
 
             $modal.modal();
@@ -332,8 +335,18 @@
                 $password = $modal.find('input[name="password"]'),
                 $confirmPassword = $modal.find('input[name="confirmPassword"]'),
                 $participants =
-                    this.$('.edit-room textarea[name="participants"]'),
-                $superusers = this.$('.edit-room textarea[name="superusers"]');
+                    this.$('.selectize-control.form-control.lcb-entry-participants.multi'),
+                $superusers = this.$('.selectize-control.form-control.lcb-entry-superusers.multi'),
+                participants,
+                superusers;
+
+            participants = _.map($participants[0].getElementsByClassName("item"), function(item) {
+                return item.getAttribute("data-value");
+            });
+
+            superusers = _.map($superusers[0].getElementsByClassName("item"), function(item) {
+                return item.getAttribute("data-value");
+            });
 
             $name.parent().removeClass('has-error');
             $confirmPassword.parent().removeClass('has-error');
@@ -353,8 +366,8 @@
                 name: $name.val(),
                 description: $description.val(),
                 password: $password.val(),
-                participants: $participants.val(),
-                superusers: $superusers.val()
+                participants: participants,
+                superusers: superusers
             });
 
             $modal.modal('hide');
@@ -531,7 +544,7 @@
                   id: id
               });
               if(!user) return;
-              
+
               window.client.createDirectMessage(user);
         },
         upload: function(e) {

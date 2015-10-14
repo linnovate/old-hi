@@ -89,23 +89,23 @@ module.exports = function() {
     core.on('rooms:update', function(room,unauthorizedUsers, newAuthorizedUsers) {
         var users = [];
         var onLineUsers;
-        
+
         if(unauthorizedUsers) {
             var connections = core.presence.system.connections.query({
                 type: 'socket.io'
             }).filter(function(connection){
                 return room.isAuthorized(connection.user.id);
             });
-            
+
             onLineUsers = connections.map(function(connection){
                 return {
                   emitter: connection.socket,
-                  user: connection.user  
+                  user: connection.user
                 };
             });
-            
+
             var dontEmit = true;
-            
+
             users = room.enabledMembers.map(function (member) {
                 var user = {
                     id: member.id,
@@ -230,7 +230,7 @@ module.exports = function() {
             if (options.userId == settings.auth.icapi.id){
                 options.userId = req.param('userId');
             }
-            
+
             core.rooms.get(options, function(err, room) {
                 if (err) {
                     console.error(err);
@@ -249,7 +249,7 @@ module.exports = function() {
             var options = {
                 owner: req.user._id.toString(),
                 name: req.param('name'),
-                slug: req.param('slug'),
+                slug: Date.now().toString(),
                 description: req.param('description'),
                 private: true, //req.param('private'),
                 password: req.param('password'),
@@ -258,7 +258,7 @@ module.exports = function() {
                 direct: req.param('direct'),
                 directName: req.param('directName')
             };
-            
+
             if(options.owner == settings.auth.icapi.id){
                 options.owner = req.param('owner');
                 options.isExternal = true;
@@ -298,9 +298,9 @@ module.exports = function() {
                 delete options.participants;
                 delete options.superusers;
             }
-            
+
             if(options.user == settings.auth.icapi.id){
-                options.user = req.param('editor');
+                options.user = req.param('owner');
             }
 
             core.rooms.update(roomId, options, function(err, room) {
@@ -319,7 +319,7 @@ module.exports = function() {
         archive: function(req, res) {
             var roomId = req.param('room') || req.param('id');
             var userId = req.user._id.toString();
-            
+
             if (userId == settings.auth.icapi.id){
                 userId = req.param('owner');
             }

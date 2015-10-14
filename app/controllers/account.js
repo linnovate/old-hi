@@ -168,11 +168,11 @@ module.exports = function() {
                       errors: err
                   });
               }
-              
+
               if(!user){
                   return res.sendStatus(404);
               }
-              
+
               res.json(user);
           });
         },
@@ -238,30 +238,31 @@ module.exports = function() {
 
             var fields = req.body || req.data;
 
-            // Sanity check password   
+            // Sanity check password
             var passwordConfirm = fields.passwordConfirm || fields.passwordconfirm || fields['password-confirm'];
-            
-            if(fields.password !== passwordConfirm){
+
+            /*if(fields.password !== passwordConfirm){ changed by jo in order to prevent password requirement
                 return res.status(400).json({
                     status: 'error',
                     message: 'Password not confirmed'
                 });
-            }
+            }*/
 
             var data = {
                 provider: 'local',
                 username: fields.username,
                 firstName: fields.firstName || fields.firstname || fields['first-name'],
-                password: fields.password,
+                //password: fields.password, changed by jo
                 lastName: fields.lastName || fields.lastname || fields['last-name'],
-                displayName: fields.displayName || fields.displayname || fields['display-name']
+                displayName: fields.displayName || fields.displayname || fields['display-name'],
+                avatar: fields.avatar || fields['avatar']
             };
-            
+
             if(fields.email){
                 data.email = fields.email;
             }
 
-            core.account.create('local', data, function(err) {
+            core.account.create('local', data, function(err,user) {
                 if (err) {
                     var message = 'Sorry, we could not process your request';
                     // User already exists
@@ -285,6 +286,7 @@ module.exports = function() {
                 }
 
                 res.status(201).json({
+                    id: user.id,
                     status: 'success',
                     message: 'You\'ve been registered, ' +
                              'please try logging in now!'

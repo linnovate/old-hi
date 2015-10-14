@@ -51,7 +51,7 @@ var RoomSchema = new mongoose.Schema({
     }],
     isExternal:{
       type: Boolean,
-      default: false  
+      default: false
     },
 	messages: [{
 		type: ObjectId,
@@ -75,7 +75,7 @@ var RoomSchema = new mongoose.Schema({
     },
     directName: {
         type: String,
-        trim: true  
+        trim: true
     },
     password: {
         type: String,
@@ -220,11 +220,23 @@ RoomSchema.method('toJSON', function(user) {
         var participants = this.participants || [];
         var superusers = this.superusers || [];
         data.participants = participants.map(function(user) {
-            return user.username ? user.username : user;
+            if (!user.username){
+                return user;
+            }
+            return {
+                username: user.username,
+                id: user.id
+            };
         });
         // changed by jo
         data.superusers = superusers.map(function(user) {
-            return user.username ? user.username : user;
+            if (!user.username){
+                return user;
+            }
+            return {
+                username: user.username,
+                id: user.id
+            };
         });
     }
 

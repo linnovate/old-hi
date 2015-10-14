@@ -4,35 +4,19 @@ var mongoose = require('mongoose'),
     _ = require('lodash'),
     helpers = require('./helpers');
 
-// Translate authorized from long string of names to models array changed by jo
-var getUsersModel = function(room, authorizedUsers, cb) {
-    if (!room.private || !authorizedUsers) {
+// Select users details from db by them ids
+var getUsersModel = function(room, userIds, cb) {
+    if (!room.private || !userIds) {
         return cb(null, []);
     }
 
-    var users = [];
-
-    if (Array.isArray(authorizedUsers)) {
-        users = authorizedUsers;
-    }
-
-    if (typeof authorizedUsers === 'string') {
-        users = authorizedUsers.replace(/@/g, '')
-            .split(',').map(function(username) {
-                return username.trim();
-            });
-    }
-
-    users = _.chain(users)
-        .map(function(username) {
-            return username && username.replace(/@,\s/g, '').trim();
-        })
-        .filter(function(username) { return !!username; })
+    userIds = _.chain(userIds)
+        .filter(function(user) { return !!user; })
         .uniq()
         .value();
 
     var User = mongoose.model('User');
-    User.find({username: { $in: users } }, cb);
+    User.find({_id: { $in: userIds } }, cb);
 };
 
 // Check if authorized superusers has been changed by comparing between
@@ -56,7 +40,7 @@ var cleanParticipants = function(participants, superusers, owner){
     var justParticipants =[];
 
     for (var i = 0; i < participants.length; i++){
-        if (!(owner == participants[i]._id)){
+        if (!(owner.toString() == participants[i]._id.toString())){
 
             var isSuperuser = false;
             for (var j = 0; j < superusers.length && !isSuperuser; j++){
@@ -79,7 +63,7 @@ var cleanSuperusers = function(superusers, owner){
     var justSuperusers =[];
 
     for (var i = 0; i < superusers.length; i++){
-        if (!(owner == superusers[i]._id)){
+        if (!(owner.toString() == superusers[i]._id.toString())){
             justSuperusers.push(superusers[i]);
         }
     }
@@ -186,7 +170,7 @@ RoomManager.prototype.canJoin = function(options, cb) {
 RoomManager.prototype.create = function(options, cb) {
     var Room = mongoose.model('Room');
     var core = this.core;
-    
+
     // Translate from string of authorized user names to ids array
     getUsersModel({private: options.private}, options.participants, function(err, participants){
         if(err){
@@ -194,7 +178,7 @@ RoomManager.prototype.create = function(options, cb) {
              console.error(err);
              return cb(err);
         }
-        
+
         // Chnaged by jo
         getUsersModel({private:options.private}, options.superusers, function(err, superusers){
             if(err){
@@ -202,29 +186,29 @@ RoomManager.prototype.create = function(options, cb) {
                 console.error(err);
                 return cb(err);
             }
-            
+
             if (options.private){
-                
+
                 // Prevent duplicate of roles to the same user changed by jo
                 superusers = cleanSuperusers(superusers, options.owner);
                 participants = cleanParticipants(participants, superusers, options.owner);
-                
+
                 // Get changed permission data in order to update room's enabled members
                 // and room's connected users changed by jo
                 var newAuthorizedUsers = getNewAuthorizedUsers([],superusers.concat(participants));
                 options.enabledMembers = updateEnabledMembers([],[],newAuthorizedUsers);
                 options.participants = participants;
                 options.superusers = superusers;
-            }   
-    
+            }
+
             Room.create(options, function(err, room) {
                 if (err) {
                     console.error(err);
                     return cb(err);
                 }
-        
+
                 room = room;// why we need that? jo
-                
+
                 if(room.private){
                     // Update room's online users
                     Room.populate(room, {path:'enabledMembers participants superusers'}, function(err, room){
@@ -358,7 +342,7 @@ RoomManager.prototype.archive = function(roomId, userId, cb) {
         if (!room) {
             return cb('Room does not exist.');
         }
-        
+
         if(room.owner.toString() !== userId){
             return cb('Only owner can archive room');
         }
