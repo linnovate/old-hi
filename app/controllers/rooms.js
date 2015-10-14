@@ -392,23 +392,12 @@ module.exports = function() {
         leave: function(req, res) {
             var roomId = req.data;
             var user = req.user.toJSON();
-
-            // Remove user from room enabled users changed by jo
-            core.rooms.get(roomId,function(err, room){
-                if (err)
-                {
-                    console.log(err);
+            
+            core.rooms.pullUser(user.id.toString(), roomId, function(err){
+                if(err){
+                    console.error(err);
                     return res.sendStatus(400);
                 }
-
-                core.rooms.pullUser(user.id.toString(), roomId, function (err) {
-                    if (err) {
-                        console.error(err);
-                        return res.sendStatus(400);
-                    }
-                });
-
-                user.room = roomId; // why we need that? jo
             });
 
             core.presence.leave(req.socket.conn, roomId);

@@ -13,8 +13,7 @@
         events: {
             'submit .lcb-rooms-add': 'create',
             'keyup .lcb-rooms-browser-filter-input': 'filter',
-            'change .lcb-rooms-switch': 'toggle',
-            'click .lcb-rooms-switch-label': 'toggle',
+            'click .leave-room': 'userLeaveRoom',
             'click #lcb-add-room [data-dismiss="modal"]': 'cancelRoomCreation',
             'click .lcb-room-alert': 'turnAlert'
         },
@@ -27,7 +26,6 @@
             this.rooms.on('remove', this.remove, this);
             this.rooms.on('change:description change:name', this.update, this);
             this.rooms.on('change:lastActive', _.debounce(this.updateLastActive, 200), this);
-            this.rooms.on('change:joined', this.updateToggles, this);
             this.rooms.on('users:add', this.addUser, this);
             this.rooms.on('users:remove', this.removeUser, this);
             this.rooms.on('users:add users:remove add remove', this.sort, this);
@@ -56,22 +54,17 @@
               $('.lcb-new-room-participants').removeClass('hide');
           }
         },
-        toggle: function(e) {
+        userLeaveRoom: function(e) {
             e.preventDefault();
-            var $target = $(e.currentTarget),
-                $input = $target.is(':checkbox') && $target || $target.siblings('[type="checkbox"]'),
-                id = $input.data('id'),
+            var $target = $(e.currentTarget).find('[data-id]'),
+                id = $target.data('id'),
                 room = this.rooms.get(id);
 
             if (!room) {
                 return;
             }
-
-            if (room.get('joined')) {
-                this.client.leaveRoom(room.id);
-            } else {
-                this.client.joinRoom(room);
-            }
+            
+            this.client.leaveRoom(room.id);
         },
         turnAlert: function(e){
           var $noteIcon = $(e.currentTarget),

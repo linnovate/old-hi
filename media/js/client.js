@@ -282,6 +282,8 @@
             this.switchRoom(room && room.get('joined') ? room.id : '');
         }
         // Remove room id from localstorage
+        
+        this.rooms.remove(id);
         RoomStore.remove(id);
     };
     // Fire user from unauthorized room changed by jo

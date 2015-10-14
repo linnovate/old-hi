@@ -75,6 +75,11 @@
             this.client.events.trigger('rooms:leave', id);
         },
         alert: function(message) {
+            var user = client.user,
+                activeRooms = user.attributes.alertedRooms;
+                
+            if(activeRooms.indexOf(message.room.id) === -1) return;
+            
             var $tab = $('.lcb-tab[data-id=' + message.room.id + ']'),
                 $total = $tab.find('.lcb-tab-alerts-total'),
                 $mentions = $tab.find('.lcb-tab-alerts-mentions');

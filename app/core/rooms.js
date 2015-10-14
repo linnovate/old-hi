@@ -550,26 +550,25 @@ RoomManager.prototype.pullUser = function(userId, roomId, cb) {
             console.error(err);
             return cb(err);
         }
-
-        var isExist = false;
-        for (var i = 0; i < room.enabledMembers.length && !isExist; i++)
-        {
-            if (room.enabledMembers[i].toString() == userId)
-            {
-                isExist = true;
+        
+        var inParticipants = room.participants.indexOf(userId) !== -1,
+            inSuperUsers   = room.superusers.indexOf(userId) !== -1;
+            
+        if(inParticipants){
+            room.participants.pull(userId);
+        }else if(inSuperUsers){
+            room.superusers.pull(userId);
+        }else{
+            return;
+        }
+        
+        room.save(function (err, room) {
+            if (err) {
+                console.error(err);
+                return cb(err);
             }
-        }
-
-        if (isExist) {
-            room.enabledMembers.pull(userId);
-            room.save(function (err, room) {
-                if (err) {
-                    console.error(err);
-                    return cb(err);
-                }
-                room = room;// why we need that? jo
-            })
-        }
+            room = room;// why we need that? jo
+        })        
     })
 };
 

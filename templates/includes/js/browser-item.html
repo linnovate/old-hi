@@ -12,9 +12,8 @@
         <div class="lcb-rooms-list-item-description">{{description}}</div>
         <ul class="lcb-rooms-list-users"></ul>
         {{#unless direct}}
-        <div class="lcb-rooms-list-item-switch onoffswitch">
-            <input type="checkbox" class="switch lcb-rooms-switch" id="room-switch-{{id}}" data-id="{{id}}" />
-            <label class="switch lcb-rooms-switch-label" for="room-switch-{{id}}"></label>
+        <div class="leave-room">
+            <span class="fa fa-2x fa-trash" data-id="{{id}}"></span>
         </div>
         <div class="lcb-room-alert fa {{#if activeAlert}}fa-bell{{else}}fa-bell-slash{{/if}}" data-id="{{id}}">
         </div>
