@@ -228,7 +228,7 @@ module.exports = function() {
             };
 
             if (options.userId == settings.auth.icapi.id){
-                options.userId = req.param('userId');
+                options.userId = req.param('owner');
             }
 
             core.rooms.get(options, function(err, room) {
@@ -392,7 +392,7 @@ module.exports = function() {
         leave: function(req, res) {
             var roomId = req.data;
             var user = req.user.toJSON();
-            
+
             core.rooms.pullUser(user.id.toString(), roomId, function(err){
                 if(err){
                     console.error(err);
