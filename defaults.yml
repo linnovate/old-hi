@@ -6,8 +6,8 @@ env: production # development / production
 
 http:
   enable: true
-  host: localhost
-  port: 5000
+  host: 
+  port: 80
 
 https:
   enable: false
@@ -52,10 +52,27 @@ auth:
   throttling:
     enable: false
     threshold: 3
-  providers: [local] # [local, kerberos, ldap] - You can specify the order
+  providers: [kerberos] # [local, kerberos, ldap] - You can specify the order
   local:
     enableRegistration: true
     passwordRegex: ^.{8,64}$
+  ldap:
+    connect_settings:
+      url: ldap://ldap.forumsys.com:389
+    bind_options:
+      bindDN: cn=read-only-admin,dc=example,dc=com
+      bindCredentials: password
+    search:
+      base: "CN=Users,DC=example,DC=com"
+      opts:
+        scope: one
+        filter: (sAMAccountName={{username}})
+    field_mappings:
+      uid: sAMAccountName
+      firstName: givenName
+      lastName: sn
+      displayName: givenName
+      email: mail
   icapi:
     id: "no-id"
 

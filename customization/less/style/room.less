@@ -32,13 +32,13 @@ textarea{
 }
 
 .lcb-room-alert{
-	font-size: 18px;
+	font-size: 22px;
 	font-weight: 300;
 	color: #aaa;
 	display: inline;
 	position: absolute;
 	top: 15px;
-	left: 90px;
+	left: 48px;
 	cursor: pointer;
 }
 
@@ -58,4 +58,44 @@ textarea{
 		text-align: center;
 		padding: 5px;
 	}
+}
+
+.lcb-rooms-mute{
+	display:none;
+}
+
+.lcb-rooms-mute:checked{
+	display: inline-block;
+	content: "\f0f3";
+}
+
+.onoffswitch .switch + label {
+	position: initial;
+	width: initial;
+	height: initial;
+	cursor: pointer;
+	background: initial;
+	box-shadow: initial;
+}
+
+.onoffswitch{
+	[type="checkbox"]:checked + label:before{
+		border: 0;
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	
+	[type="checkbox"] + label:before{
+		content: "\f1f8";
+		font-size: 1.5em;
+		border: 0;
+	}	
+}
+
+.leave-room {
+	right: inherit;
+	left: 24px;
+	position: absolute;
+	top: 12px;
+	cursor: pointer;
 }

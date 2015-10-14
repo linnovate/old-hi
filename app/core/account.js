@@ -61,7 +61,7 @@ AccountManager.prototype.update = function(id, options, cb) {
             
             index = user.alertedRooms.indexOf(options.roomId);
             
-            if(index !== -1){
+            if(index === -1){
                 user.alertedRooms.push(options.roomId);
             }else{
                 user.alertedRooms.splice(index, 1);

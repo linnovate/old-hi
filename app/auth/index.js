@@ -22,7 +22,10 @@ function getProviders(core) {
 
         if (key === 'local') {
             Provider = require('./local');
-        } else {
+        } else if (key === 'adfs'){
+            Provider = require('./adfs');
+        } 
+        else {
             Provider = plugins.getPlugin(key, 'auth');
         }
 
