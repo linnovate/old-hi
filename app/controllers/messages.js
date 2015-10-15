@@ -32,7 +32,7 @@ module.exports = function() {
             req.io.route('messages:create');
         });
 
-    app.route('/rooms/:room/messages')
+    app.route('/rooms/:id/messages')
         .all(middlewares.requireLogin, middlewares.roomRoute)
         .get(function(req) {
             req.io.route('messages:list');
@@ -48,7 +48,7 @@ module.exports = function() {
         create: function(req, res) {
             var options = {
                     owner: req.user._id.toString(),
-                    room: req.param('room'),
+                    room: req.param('room') || req.param('id'),
                     text: req.param('text')
                 };
 
@@ -68,7 +68,7 @@ module.exports = function() {
                     userId: req.user._id,
                     password: req.param('password'),
 
-                    room: req.param('room'),
+                    room: req.param('room') || req.param('id'),
                     since_id: req.param('since_id'),
                     from: req.param('from'),
                     to: req.param('to'),

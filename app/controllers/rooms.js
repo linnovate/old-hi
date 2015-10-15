@@ -176,7 +176,7 @@ module.exports = function() {
             req.io.route('rooms:create');
         });
 
-    app.route('/rooms/:room')
+    app.route('/rooms/:id')
         .all(middlewares.requireLogin, middlewares.roomRoute)
         .get(function(req) {
             req.io.route('rooms:get');
@@ -405,7 +405,7 @@ module.exports = function() {
             res.json();
         },
         users: function(req, res) {
-            var roomId = req.param('room');
+            var roomId = req.param('room') || req.param('id');
 
             core.rooms.get(roomId, function(err, room) {
                 if (err) {

@@ -7,7 +7,7 @@
 var mongoose = require('mongoose');
 
 module.exports = function(req, res, next) {
-    var room = req.params.room;
+    var room = req.params.id;
 
     if (!room) {
         return res.sendStatus(404);

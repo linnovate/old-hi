@@ -55,12 +55,12 @@ FileManager.prototype.create = function(options, cb) {
         if (room.archived) {
             return cb('Room is archived.');
         }
-        if (!room.isAuthorized(options.owner)) {
+        if (!room.isAuthorized(options.userId)) {
             return cb('Not authorized.');
         }
 
         new File({
-            owner: options.owner,
+            owner: options.userId,
             name: options.file.originalname,
             type: options.file.mimetype,
             size: options.file.size,
@@ -77,7 +77,7 @@ FileManager.prototype.create = function(options, cb) {
                 }
 
                 // Temporary workaround for _id until populate can do aliasing
-                User.findOne(options.owner, function(err, user) {
+                User.findOne(options.userId, function(err, user) {
                     if (err) {
                         console.error(err);
                         return cb(err);

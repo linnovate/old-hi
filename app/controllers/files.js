@@ -47,7 +47,7 @@ module.exports = function() {
             req.io.route('files:create');
         });
 
-    app.route('/rooms/:room/files')
+    app.route('/rooms/:id/files')
         .all(middlewares.requireLogin, middlewares.roomRoute)
         .get(function(req) {
             req.io.route('files:list');
@@ -89,16 +89,16 @@ module.exports = function() {
             }
 
             var options = {
-                    owner: req.user._id.toString(),
-                    room: req.param('room'),
+                    userId: req.user._id.toString(),
+                    room: req.param('room') || req.param('id'),
                     file: req.files.file[0],
                     post: (req.param('post') === 'true') && true
                 };
-                
-            if(options.owner == settings.auth.icapi.id){
-                options.owner = req.param('userId');
+
+            if(options.userId == settings.auth.icapi.id){
+                options.userId = req.param('owner');
             }
-            
+
             core.files.create(options, function(err, file) {
                 if (err) {
                     console.error(err);
@@ -112,7 +112,7 @@ module.exports = function() {
                     userId: req.user._id,
                     password: req.param('password'),
 
-                    room: req.param('room'),
+                    room: req.param('room') || req.param('id'),
                     reverse: req.param('reverse'),
                     skip: req.param('skip'),
                     take: req.param('take'),
