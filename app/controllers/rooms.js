@@ -249,7 +249,7 @@ module.exports = function() {
             var options = {
                 owner: req.user._id.toString(),
                 name: req.param('name'),
-                slug: Date.now().toString(),
+                slug: req.param('slug') || Date.now().toString(),
                 description: req.param('description'),
                 private: true, //req.param('private'),
                 password: req.param('password'),

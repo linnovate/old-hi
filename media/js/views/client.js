@@ -87,47 +87,47 @@
             this.client.status.once('change:connected', _.bind(function(status, connected) {
                 this.$el.find('.lcb-client-loading').hide(connected);
             }, this));
-            
+
             //
             // Selectize
             //
             this.attachSelectize('.lcb-direct-user-name');
-            
+
             this.client.createDirectMessage = this.createDirectMessage;
-            
+
             return this;
         },
         createDirectMessage: function(user){
             var current_user = window.client.user;
-            
+
             // Don't let user send a direct message to himself;
             if(current_user.id == user.id){
                 return;
             }
-            
+
             // To check if I already created this room
             var slug = user.id + current_user.id;
             var opposite_slug = current_user.id + user.id;
-            
+
             var room = window.client.rooms.findWhere({
                 slug: slug
             });
-            
+
             room = room || window.client.rooms.findWhere({
                 slug: opposite_slug
             });
-            
+
             // Room not created
             if(!room){
                 var data = {
                     name: window.client.user.get('displayName'),
-                    participants: [user.get('username'), current_user.get('username')],
+                    participants: [user.id, current_user.id],
                     private: true,
                     slug: slug,
                     direct: true,
                     directName: user.get('displayName')
                 };
-                
+
                 window.client.events.trigger('rooms:create', data);
             }
             else{
@@ -139,7 +139,7 @@
             }
         },
         toggleNavbar: function(e){
-            
+
         },
         toggleSideBar: function(e) {
             this.$el.toggleClass('lcb-sidebar-opened');
@@ -155,7 +155,7 @@
         attachSelectize: function(textareaElement){
             var that = this;
             var all_users = that.client.getUsersSync();
-            
+
             this.$(textareaElement).selectize({
                delimiter: ',',
                create: false,
@@ -175,7 +175,7 @@
                            that.clearDirectMessage();
                            return;
                        }
-                       
+
                        that.clearDirectMessage();
                        $('#directMessageModal').closeModal();
                        that.createDirectMessage(user);
@@ -183,11 +183,11 @@
                },
                load: function(query, callback){
                    if(!query.length) return callback();
-                   
+
                    var users = _.filter(all_users.models, function(user){
-                      return user.get('username').indexOf(query) !== -1; 
+                      return user.get('username').indexOf(query) !== -1;
                    });
-                   
+
                    users = _.map(users, function(user){
                        return{
                            value: user.get('username'),
@@ -196,10 +196,10 @@
                            displayName: user.get('displayName')
                        };
                    });
-                   
+
                    callback(users);
-               } 
-            }); 
+               }
+            });
         }
     });
 
