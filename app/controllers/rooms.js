@@ -299,6 +299,11 @@ module.exports = function() {
                 delete options.superusers;
             }
 
+            if(!options.participants || !options.superusers)
+            {
+                return res.sendStatus(400);
+            }
+
             if(options.user == settings.auth.icapi.id){
                 options.user = req.param('owner');
             }

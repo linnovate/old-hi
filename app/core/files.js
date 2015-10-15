@@ -77,7 +77,7 @@ FileManager.prototype.create = function(options, cb) {
                 }
 
                 // Temporary workaround for _id until populate can do aliasing
-                User.findOne(options.userId, function(err, user) {
+                User.findOne({_id : options.userId}, function(err, user) {
                     if (err) {
                         console.error(err);
                         return cb(err);
